@@ -29,6 +29,7 @@
         <rest.assured.version>2.3.3</rest.assured.version>
         <fastjson.version>2.0.4</fastjson.version>
         <hutool.version>5.8.16</hutool.version>
+        <mybatisplus.version>3.4.3</mybatisplus.version>
     </properties>
 
     <dependencies>

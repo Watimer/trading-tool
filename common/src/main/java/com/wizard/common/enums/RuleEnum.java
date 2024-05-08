@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
- * @author 岳耀栎
+ * @author 巫师
  * @date 2024-05-08
  * @desc 规则枚举
  */

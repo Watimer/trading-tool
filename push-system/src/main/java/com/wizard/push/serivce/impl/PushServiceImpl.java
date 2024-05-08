@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
- * @author 岳耀栎
+ * @author 巫师
  * @date 2024-05-08
  * @desc
  */
@@ -27,7 +27,8 @@ public class PushServiceImpl implements PushService {
 		Boolean resultFlag = Boolean.FALSE;
 
 		StringBuffer stringBuffer = new StringBuffer();
-		stringBuffer.append("警报类型:").append(pushEnum.getDescription())
+		stringBuffer.append("警报类型:").append(pushEnum.getDescription().replace(":",""))
+				.append("\n")
 				.append("\n")
 				.append("标的:").append(symbol)
 				.append("\n")

@@ -1,6 +1,7 @@
 package com.wizard.service.impl;
 
 import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.net.NetUtil;
 import cn.hutool.http.HttpRequest;
 import com.alibaba.fastjson.JSONArray;
@@ -10,6 +11,7 @@ import com.binance.connector.futures.client.exceptions.BinanceConnectorException
 import com.binance.connector.futures.client.impl.UMFuturesClientImpl;
 import com.wizard.common.enums.ExchangeEnum;
 import com.wizard.common.enums.PushEnum;
+import com.wizard.component.GlobalListComponent;
 import com.wizard.model.vo.InterestHistVO;
 import com.wizard.push.serivce.PushService;
 import com.wizard.service.FutureService;
@@ -23,9 +25,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
- * @author 岳耀栎
+ * @author 巫师
  * @date 2024-05-07
  * @desc
  */
@@ -36,6 +39,56 @@ public class FutureServiceImpl implements FutureService {
 	@Resource
 	PushService pushService;
 
+	@Resource
+	GlobalListComponent globalListComponent;
+
+	/**
+	 * 检测是否存在新增标的
+	 *
+	 * @param logId 日志ID
+	 */
+	@Override
+	public void checkNewSymbol(Long logId) {
+		// 获取全部交易标的
+		List<String> symbolList = getExchangeInfo(logId);
+		List<String> alreadyList = globalListComponent.getGlobalList();
+		boolean isEqual = symbolList.stream().allMatch(alreadyList::contains);
+		if(!isEqual){
+			// 最新可交易列表中存在的标的
+			List<String> newSymbolList = symbolList.stream()
+					.filter(element -> !alreadyList.contains(element))
+					.collect(Collectors.toList());
+
+			// 最新可交易列表中存在的标的
+			List<String> deleteSymbolList = alreadyList.stream()
+					.filter(element -> !symbolList.contains(element))
+					.collect(Collectors.toList());
+			// 存在新增标的
+			if(!newSymbolList.isEmpty()){
+				for (String symbol : newSymbolList) {
+					Boolean pushFlag = pushService.pushFeiShu(logId,symbol, DateUtil.now(),"", ExchangeEnum.EXCHANGE_BINANCE, PushEnum.FUTURES_SYMBOL_ADD);
+					if(pushFlag){
+						log.info("日志ID:{},标的:{},推送消息成功",logId,symbol);
+					}
+				}
+			}
+			// 存在去除的标的
+			if(!deleteSymbolList.isEmpty()){
+				for (String symbol : newSymbolList) {
+					Boolean pushFlag = pushService.pushFeiShu(logId,symbol, DateUtil.now(),"", ExchangeEnum.EXCHANGE_BINANCE, PushEnum.FUTURES_SYMBOL_DELETE);
+					if(pushFlag){
+						log.info("日志ID:{},标的:{},推送消息成功",logId,symbol);
+					}
+				}
+			}
+			// 清空列表
+			globalListComponent.removeAll(logId);
+
+			// 重新添加数据
+			globalListComponent.addToGlobalList(logId,symbolList);
+		}
+	}
+
 	/**
 	 * 异步方法计算币安合约持仓量
 	 */
@@ -45,7 +98,7 @@ public class FutureServiceImpl implements FutureService {
 		log.info("日志ID:{},进入合约持仓量计算方法",logId);
 		// TODO 以下方法需要抽取为公共方法,实现传入不同标的以及对应计算规则,动态计算是否符合通知条件
 		// 获取全部交易标的
-		List<String> symbolList = getExchangeInfo();
+		List<String> symbolList = globalListComponent.getGlobalList();
 		for (String symbol : symbolList) {
 			LinkedHashMap<String, Object> parameters = new LinkedHashMap<>();
 
@@ -57,7 +110,6 @@ public class FutureServiceImpl implements FutureService {
 			parameters.put("symbol", symbol);
 			parameters.put("period", "5m");
 			parameters.put("limit",2);
-			Boolean pushFlag = Boolean.TRUE;
 			try {
 				String result = client.market().openInterestStatistics(parameters);
 				// 转化结果
@@ -69,20 +121,17 @@ public class FutureServiceImpl implements FutureService {
 						previousInterestHistVO = interestHistVOList.get(i);
 					}
 					InterestHistVO interestHistVO = interestHistVOList.get(i - 1);
-					log.info("日志ID:{},当前时间:{},持仓量:{},持仓价值:{}",logId, DateTime.of(interestHistVO.getTimestamp()),interestHistVO.getSumOpenInterest(),interestHistVO.getSumOpenInterestValue());
+					log.info("日志ID:{},当前时间:{},标的:{},持仓量:{},持仓价值:{}",logId, interestHistVO.getSymbol(),DateTime.of(interestHistVO.getTimestamp()),interestHistVO.getSumOpenInterest(),interestHistVO.getSumOpenInterestValue());
 					if(null != previousInterestHistVO){
 						// 此处需要重新写计算规则
 						synchronized (this) {
-							BigDecimal compareResult = previousInterestHistVO.getSumOpenInterest().divide(interestHistVO.getSumOpenInterest(),2);
-							if(compareResult.compareTo(new BigDecimal("1.5")) < 0){
-								log.info("日志ID:{},当前时间:{},价值减少",logId,DateTime.of(interestHistVO.getTimestamp()));
-							} else {
-								log.info("日志ID:{},当前时间:{},价值增加",logId,DateTime.of(interestHistVO.getTimestamp()));
+							BigDecimal compareResult = interestHistVO.getSumOpenInterest().divide(previousInterestHistVO.getSumOpenInterest(),2,BigDecimal.ROUND_HALF_UP);
+							if(compareResult.compareTo(new BigDecimal("1.5")) > 0){
+								log.info("日志ID:{},当前时间:{},标的:{},价值增加",logId,interestHistVO.getSymbol(),DateTime.of(interestHistVO.getTimestamp()));
+								Boolean pushFlag = pushService.pushFeiShu(logId,interestHistVO.getSymbol(),
+										DateTime.of(interestHistVO.getTimestamp()).toString(),"", ExchangeEnum.EXCHANGE_BINANCE, PushEnum.FUTURES_OPEN_INTEREST_LONG);
 								if(pushFlag){
-									pushFlag = Boolean.FALSE;
-									pushService.pushFeiShu(logId,interestHistVO.getSymbol(),
-											DateTime.of(interestHistVO.getTimestamp()).toString(),"", ExchangeEnum.EXCHANGE_BINANCE, PushEnum.FUTURES_OPEN_INTEREST_LONG);
-
+									log.info("日志ID:{},标的:{},推送消息成功",logId,interestHistVO.getSymbol());
 								}
 							}
 						}
@@ -99,7 +148,8 @@ public class FutureServiceImpl implements FutureService {
 
 	}
 
-	public List<String> getExchangeInfo() {
+	@Override
+	public List<String> getExchangeInfo(Long logId) {
 		List<String> resultList = new ArrayList<>();
 		UMFuturesClientImpl client = new UMFuturesClientImpl();
 
@@ -111,7 +161,7 @@ public class FutureServiceImpl implements FutureService {
 				JSONObject jsonObject1 = jsonArray.getJSONObject(i);
 				resultList.add(jsonObject1.getString("symbol"));
 			}
-			log.info(result);
+			log.info("日志ID:{},当前标的数量:{}",logId,resultList.size());
 		} catch (BinanceConnectorException e) {
 			log.error("fullErrMessage: {}", e.getMessage(), e);
 		} catch (BinanceClientException e) {
@@ -121,4 +171,5 @@ public class FutureServiceImpl implements FutureService {
 
 		return resultList;
 	}
+
 }

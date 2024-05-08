@@ -1,7 +1,7 @@
 package com.wizard.config;
 
 /**
- * @author 岳耀栎
+ * @author 巫师
  * @date 2024-05-07
  * @desc
  */

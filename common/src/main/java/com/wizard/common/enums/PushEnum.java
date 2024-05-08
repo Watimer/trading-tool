@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
- * @author 岳耀栎
+ * @author 巫师
  * @date 2024-05-08
  * @desc 推送类型枚举对象
  */
@@ -16,6 +16,8 @@ public enum PushEnum {
 	 */
 	FUTURES_OPEN_INTEREST_LONG(98,"合约持仓量:","LONG","增加"),
 	FUTURES_OPEN_INTEREST_SHORT(98,"合约持仓量:","SHORT","减少"),
+	FUTURES_SYMBOL_ADD(98,"标的增减:","ADD","增加"),
+	FUTURES_SYMBOL_DELETE(98,"标的增减:","DELETE","减少"),
 	DOWNLOAD_ERROR(99,"出现错误","ERROR","失败");
 
 	/** 状态编码 */

@@ -1,21 +1,16 @@
 package com.wizard.component;
 
-import com.binance.connector.futures.client.exceptions.BinanceClientException;
-import com.binance.connector.futures.client.exceptions.BinanceConnectorException;
-import com.binance.connector.futures.client.impl.UMFuturesClientImpl;
-import com.binance.connector.futures.client.impl.UMWebsocketClientImpl;
+import com.baomidou.mybatisplus.core.toolkit.IdWorker;
+import com.wizard.service.FutureService;
 import lombok.extern.slf4j.Slf4j;
-import org.json.JSONObject;
-import org.springframework.boot.autoconfigure.AutoConfigureBefore;
-import org.springframework.http.converter.json.GsonBuilderUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import java.util.LinkedHashMap;
+import java.util.List;
 
 /**
- * @author 岳耀栎
+ * @author 巫师
  * @date 2024-05-07
  * @desc
  */
@@ -23,22 +18,22 @@ import java.util.LinkedHashMap;
 @Component
 public class StartComponent {
 
+	@Resource
+	FutureService futureService;
 
-	// 启动时执行
-	//@PostConstruct
-	public void init(){
-		log.info("启动时执行1");
-		UMWebsocketClientImpl websocketClient = new UMWebsocketClientImpl();
-		websocketClient.klineStream("btcusdt", "1h", ((event) -> {
-			//System.out.println(event);
-			log.info("返回信息:{}", JSONObject.valueToString(event));
-			//websocketClient.closeAllConnections();
-		}));
-	}
+	@Resource
+	GlobalListComponent globalListComponent;
 
-	//@PostConstruct
-	public void init2(){
-		log.info("启动时执行2");
-
+	/**
+	 * 项目启动时执行
+	 * 用于将可交易标的放入内存中,方便后续直接调用或者计算是否有增减标的内容
+	 */
+	@PostConstruct
+	public void initGlobalList(){
+		Long logId = IdWorker.getId();
+		log.info("日志ID:{},启动时执行1",logId);
+		List<String> symbolList= futureService.getExchangeInfo(logId);
+		globalListComponent.addToGlobalList(logId,symbolList);
+		log.info("日志ID:{},数据初始化完成..",logId);
 	}
 }

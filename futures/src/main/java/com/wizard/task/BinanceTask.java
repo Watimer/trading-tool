@@ -1,8 +1,10 @@
 package com.wizard.task;
 
+import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.wizard.service.FutureService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
@@ -10,7 +12,7 @@ import javax.annotation.Resource;
 
 
 /**
- * @author 岳耀栎
+ * @author 巫师
  * @date 2024-05-07
  * @desc
  */
@@ -24,10 +26,27 @@ public class BinanceTask {
 
 	/**
 	 * 计算币安合约持仓量
+	 * 从零时开始,每五分钟执行一次
 	 */
-	@Scheduled(fixedDelay = 2*10*1000)
+	@Async
+	@Scheduled(cron = "* 0/5 0/1 * * ? ")
 	public void openInterestStatistics(){
-		Long logId = System.currentTimeMillis();
+		Long logId = IdWorker.getId();
+		log.info("日志ID:{},开始检测合约持仓量是否存在异动",logId);
 		futureService.openInterestStatistics(logId);
+		log.info("日志ID:{},完成检测合约持仓量是否存在异动",logId);
+	}
+
+	/**
+	 * 监控是否存在新增标的
+	 * 每分钟执行一次
+	 */
+	@Async
+	@Scheduled(fixedRate = 60000)
+	public void checkNewSymbol(){
+		Long logId = IdWorker.getId();
+		log.info("日志ID:{},开始检测是否存在新增标的",logId);
+		futureService.checkNewSymbol(logId);
+		log.info("日志ID:{},完成检测是否存在新增标的",logId);
 	}
 }

@@ -11,6 +11,7 @@ import com.binance.connector.futures.client.exceptions.BinanceConnectorException
 import com.binance.connector.futures.client.impl.UMFuturesClientImpl;
 import com.wizard.common.enums.ExchangeEnum;
 import com.wizard.common.enums.PushEnum;
+import com.wizard.component.CheckComponent;
 import com.wizard.component.GlobalListComponent;
 import com.wizard.model.vo.InterestHistVO;
 import com.wizard.push.serivce.PushService;
@@ -92,6 +93,9 @@ public class FutureServiceImpl implements FutureService {
 		}
 	}
 
+	@Resource
+	CheckComponent checkComponent;
+
 	/**
 	 * 异步方法计算币安合约持仓量
 	 */
@@ -102,11 +106,12 @@ public class FutureServiceImpl implements FutureService {
 		// TODO 以下方法需要抽取为公共方法,实现传入不同标的以及对应计算规则,动态计算是否符合通知条件
 		// 获取全部交易标的
 		List<String> symbolList = globalListComponent.getGlobalList();
-		ExecutorService executor = Executors.newFixedThreadPool(10);
+		ExecutorService executor = Executors.newFixedThreadPool(3);
 		CompletableFuture<Void> allOf = null;
 		for (String symbol : symbolList) {
+			//checkComponent.checkInterestStatistics(logId,symbol);
 			CompletableFuture<Void> future = CompletableFuture.runAsync(() ->
-							checkInterestStatistics(logId,symbol)
+							checkComponent.checkInterestStatistics(logId,symbol)
 					,executor);
 			allOf = CompletableFuture.allOf(future);
 		}
@@ -114,9 +119,10 @@ public class FutureServiceImpl implements FutureService {
 		allOf.thenRun(executor::shutdown);
 		// 等待所有线程执行完成
 		allOf.join();
+		//executor.shutdown();
 	}
 
-
+	@Async
 	public void checkInterestStatistics(Long logId,String symbol){
 		LinkedHashMap<String, Object> parameters = new LinkedHashMap<>();
 

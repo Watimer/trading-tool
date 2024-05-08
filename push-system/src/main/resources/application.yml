@@ -1,0 +1,5 @@
+
+
+# 飞书配置
+FEISHU:
+  WEBHOOK_URL: https://open.feishu.cn/open-apis/bot/v2/hook/48e0a8c2-b69e-466f-a4ab-9928b8657568

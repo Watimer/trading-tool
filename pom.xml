@@ -10,6 +10,8 @@
     <name>trading-tool</name>
     <modules>
         <module>futures</module>
+        <module>push-system</module>
+        <module>common</module>
     </modules>
 
     <parent>
@@ -25,6 +27,8 @@
         <lombok.version>1.14.8</lombok.version>
         <log4jdbc.log4j2.version>1.16</log4jdbc.log4j2.version>
         <rest.assured.version>2.3.3</rest.assured.version>
+        <fastjson.version>2.0.4</fastjson.version>
+        <hutool.version>5.8.16</hutool.version>
     </properties>
 
     <dependencies>

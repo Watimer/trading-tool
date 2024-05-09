@@ -49,4 +49,18 @@ public class BinanceTask {
 		futureService.checkNewSymbol(logId);
 		log.info("日志ID:{},完成检测是否存在新增标的",logId);
 	}
+
+	/**
+	 * 计算币安费率
+	 * 从零时开始,每四小执行一次
+	 * 并推送负费率数据
+	 */
+	@Async
+	@Scheduled(cron = "* * 0-4 * * ? ")
+	public void getRate(){
+		Long logId = IdWorker.getId();
+		log.info("日志ID:{},开始检测当前资金费率",logId);
+		futureService.getRate(logId);
+		log.info("日志ID:{},完成检测当前资金费率",logId);
+	}
 }

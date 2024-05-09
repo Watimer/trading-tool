@@ -23,4 +23,10 @@ public interface FutureService {
 	 * @return
 	 */
 	List<String> getExchangeInfo(Long logId);
+
+	/**
+	 * 检测资金费率
+	 * @param logId
+	 */
+	void getRate(Long logId);
 }

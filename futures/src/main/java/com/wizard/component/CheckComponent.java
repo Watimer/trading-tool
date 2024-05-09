@@ -58,7 +58,8 @@ public class CheckComponent {
 					// 此处需要重新写计算规则
 					//synchronized (this) {
 					BigDecimal compareResult = interestHistVO.getSumOpenInterest().divide(previousInterestHistVO.getSumOpenInterest(),2,BigDecimal.ROUND_HALF_UP);
-					if(compareResult.compareTo(new BigDecimal("1.5")) > 0){
+					log.info("日志ID:{},当前时间:{},标的:{},持仓量:{},计算结果:{}",logId,interestHistVO.getSymbol(), DateTime.of(interestHistVO.getTimestamp()),compareResult);
+					if(compareResult.compareTo(new BigDecimal("1.2")) >= 0){
 						log.info("日志ID:{},当前时间:{},标的:{},价值增加",logId,interestHistVO.getSymbol(),DateTime.of(interestHistVO.getTimestamp()));
 						Boolean pushFlag = pushService.pushFeiShu(logId,interestHistVO.getSymbol(),
 								DateTime.of(interestHistVO.getTimestamp()).toString(),"", ExchangeEnum.EXCHANGE_BINANCE, PushEnum.FUTURES_OPEN_INTEREST_LONG);

@@ -3,6 +3,8 @@ package com.wizard.service.impl;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.net.NetUtil;
+import cn.hutool.core.util.NumberUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpRequest;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -14,18 +16,17 @@ import com.wizard.common.enums.PushEnum;
 import com.wizard.component.CheckComponent;
 import com.wizard.component.GlobalListComponent;
 import com.wizard.model.vo.InterestHistVO;
+import com.wizard.model.vo.SymbolFundingRateVO;
 import com.wizard.push.serivce.PushService;
 import com.wizard.service.FutureService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -106,7 +107,7 @@ public class FutureServiceImpl implements FutureService {
 		// TODO 以下方法需要抽取为公共方法,实现传入不同标的以及对应计算规则,动态计算是否符合通知条件
 		// 获取全部交易标的
 		List<String> symbolList = globalListComponent.getGlobalList();
-		ExecutorService executor = Executors.newFixedThreadPool(3);
+		ExecutorService executor = Executors.newFixedThreadPool(2);
 		CompletableFuture<Void> allOf = null;
 		for (String symbol : symbolList) {
 			//checkComponent.checkInterestStatistics(logId,symbol);
@@ -194,4 +195,44 @@ public class FutureServiceImpl implements FutureService {
 		return resultList;
 	}
 
+	/**
+	 * 检测资金费率
+	 *
+	 * @param logId
+	 */
+	@Override
+	public void getRate(Long logId) {
+		LinkedHashMap<String, Object> parameters = new LinkedHashMap<>();
+
+		UMFuturesClientImpl client = new UMFuturesClientImpl();
+
+		try {
+			String result = client.market().fundingRate(parameters);
+			List<SymbolFundingRateVO> symbolFundingRateVOList = JSONArray.parseArray(result,SymbolFundingRateVO.class);
+			// 过滤出负费率标的
+			BigDecimal bigDecimal = new BigDecimal("0");
+			List<SymbolFundingRateVO> tempList = symbolFundingRateVOList.stream()
+					.filter(item -> item.getFundingRate().compareTo(bigDecimal)<0)
+					.sorted(Comparator.comparing(SymbolFundingRateVO::getFundingRate))
+					.collect(Collectors.toList());
+			if(!tempList.isEmpty()){
+				for (SymbolFundingRateVO symbolFundingRateVO:tempList) {
+					PushEnum pushEnum = PushEnum.FUTURES_SYMBOL_RATE;
+					BigDecimal rateResult = symbolFundingRateVO.getFundingRate().multiply(new BigDecimal("100"));
+					pushEnum.setDescription("资金费率:", String.format("%.4f%%",rateResult));
+					Boolean pushFlag = pushService.pushFeiShu(logId,symbolFundingRateVO.getSymbol(),
+							DateTime.of(symbolFundingRateVO.getFundingTime()).toString(),"", ExchangeEnum.EXCHANGE_BINANCE, PushEnum.FUTURES_SYMBOL_RATE);
+					if(pushFlag){
+						log.info("日志ID:{},标的:{},推送消息成功",logId,symbolFundingRateVO.getSymbol());
+					}
+				}
+			}
+			log.info("{}",result);
+		} catch (BinanceConnectorException e) {
+			log.error("fullErrMessage: {}", e.getMessage(), e);
+		} catch (BinanceClientException e) {
+			log.error("fullErrMessage: {} \nerrMessage: {} \nerrCode: {} \nHTTPStatusCode: {}",
+					e.getMessage(), e.getErrMsg(), e.getErrorCode(), e.getHttpStatusCode(), e);
+		}
+	}
 }

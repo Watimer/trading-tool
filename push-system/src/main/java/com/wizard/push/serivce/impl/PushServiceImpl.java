@@ -32,13 +32,13 @@ public class PushServiceImpl implements PushService {
 				.append("\n")
 				.append("标的:").append(symbol)
 				.append("\n")
-				.append("时间:").append(dateTime)
-				.append("\n")
 				.append("平台:").append(exchangeEnum.getEnName())
 				.append("\n")
 				.append(pushEnum.getDescription()).append(pushEnum.getDetail())
 				.append("\n")
-				.append("方向:").append(pushEnum.getDirection());
+				.append("方向:").append(pushEnum.getDirection())
+				.append("\n")
+				.append("时间:").append(dateTime);
 		com.alibaba.fastjson.JSONObject jsonObject = new com.alibaba.fastjson.JSONObject();
 		jsonObject.put("msg_type","text");
 		com.alibaba.fastjson.JSONObject jsonObjectContent = new com.alibaba.fastjson.JSONObject();

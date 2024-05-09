@@ -56,7 +56,7 @@ public class BinanceTask {
 	 * 并推送负费率数据
 	 */
 	@Async
-	@Scheduled(cron = "* * 0-4 * * ? ")
+	@Scheduled(fixedRate = 4 * 60 * 60 * 1000)
 	public void getRate(){
 		Long logId = IdWorker.getId();
 		log.info("日志ID:{},开始检测当前资金费率",logId);

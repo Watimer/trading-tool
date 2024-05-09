@@ -10,6 +10,7 @@ import com.wizard.common.enums.PushEnum;
 import com.wizard.model.vo.InterestHistVO;
 import com.wizard.push.serivce.PushService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
@@ -29,6 +30,8 @@ public class CheckComponent {
 
 	@Resource
 	PushService pushService;
+
+	private String ADD_NUMBER = "1.2";
 
 	@Async
 	public void checkInterestStatistics(Long logId,String symbol){
@@ -59,7 +62,7 @@ public class CheckComponent {
 					//synchronized (this) {
 					BigDecimal compareResult = interestHistVO.getSumOpenInterest().divide(previousInterestHistVO.getSumOpenInterest(),2,BigDecimal.ROUND_HALF_UP);
 					log.info("日志ID:{},当前时间:{},标的:{},持仓量:{},计算结果:{}",logId,interestHistVO.getSymbol(), DateTime.of(interestHistVO.getTimestamp()),compareResult);
-					if(compareResult.compareTo(new BigDecimal("1.2")) >= 0){
+					if(compareResult.compareTo(new BigDecimal(ADD_NUMBER)) >= 0){
 						log.info("日志ID:{},当前时间:{},标的:{},价值增加",logId,interestHistVO.getSymbol(),DateTime.of(interestHistVO.getTimestamp()));
 						Boolean pushFlag = pushService.pushFeiShu(logId,interestHistVO.getSymbol(),
 								DateTime.of(interestHistVO.getTimestamp()).toString(),"", ExchangeEnum.EXCHANGE_BINANCE, PushEnum.FUTURES_OPEN_INTEREST_LONG);

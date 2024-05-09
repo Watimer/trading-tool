@@ -19,8 +19,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class PushServiceImpl implements PushService {
 
-	@Value("${FEISHU.WEBHOOK_URL}")
-	String FS_WEBHOOK_URL;
+	@Value("${FEISHU.FS_WEBHOOK_URL}")
+	private String FS_WEBHOOK_URL;
 
 	@Override
 	public Boolean pushFeiShu(Long logId, String symbol, String dateTime, String title, ExchangeEnum exchangeEnum, PushEnum pushEnum) {

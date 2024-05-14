@@ -31,16 +31,17 @@ public class CheckComponent {
 	@Resource
 	PushService pushService;
 
-	private String ADD_NUMBER = "1.2";
+	@Value("${ADD_NUMBER}")
+	private String ADD_NUMBER;
+
+	@Value("${PROXY.URL}")
+	private String PROXY_URL;
 
 	@Async
 	public void checkInterestStatistics(Long logId,String symbol){
 		LinkedHashMap<String, Object> parameters = new LinkedHashMap<>();
 
-		String proxyUrl = "https://proxy-52x6ddbv1-watimers-projects.vercel.app/";
-		String baseURL = "https/fapi.binance.com";
-
-		UMFuturesClientImpl client = new UMFuturesClientImpl();
+		UMFuturesClientImpl client = new UMFuturesClientImpl(PROXY_URL);
 
 		parameters.put("symbol", symbol);
 		parameters.put("period", "5m");
@@ -61,7 +62,7 @@ public class CheckComponent {
 					// 此处需要重新写计算规则
 					//synchronized (this) {
 					BigDecimal compareResult = interestHistVO.getSumOpenInterest().divide(previousInterestHistVO.getSumOpenInterest(),2,BigDecimal.ROUND_HALF_UP);
-					log.info("日志ID:{},当前时间:{},标的:{},持仓量:{},计算结果:{}",logId,interestHistVO.getSymbol(), DateTime.of(interestHistVO.getTimestamp()),compareResult);
+					log.info("日志ID:{},当前时间:{},标的:{},持仓量:{},计算结果:{}",logId,DateTime.of(interestHistVO.getTimestamp()),interestHistVO.getSymbol(),interestHistVO.getSumOpenInterest(),compareResult);
 					if(compareResult.compareTo(new BigDecimal(ADD_NUMBER)) >= 0){
 						log.info("日志ID:{},当前时间:{},标的:{},价值增加",logId,interestHistVO.getSymbol(),DateTime.of(interestHistVO.getTimestamp()));
 						Boolean pushFlag = pushService.pushFeiShu(logId,interestHistVO.getSymbol(),

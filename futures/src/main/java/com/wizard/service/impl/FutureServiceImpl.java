@@ -20,6 +20,7 @@ import com.wizard.model.vo.SymbolFundingRateVO;
 import com.wizard.push.serivce.PushService;
 import com.wizard.service.FutureService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -46,6 +47,9 @@ public class FutureServiceImpl implements FutureService {
 
 	@Resource
 	GlobalListComponent globalListComponent;
+
+	@Value("${PROXY.URL}")
+	private String PROXY_URL;
 
 	/**
 	 * 检测是否存在新增标的
@@ -107,6 +111,9 @@ public class FutureServiceImpl implements FutureService {
 		// TODO 以下方法需要抽取为公共方法,实现传入不同标的以及对应计算规则,动态计算是否符合通知条件
 		// 获取全部交易标的
 		List<String> symbolList = globalListComponent.getGlobalList();
+		if(symbolList.isEmpty()){
+			return;
+		}
 		ExecutorService executor = Executors.newFixedThreadPool(2);
 		CompletableFuture<Void> allOf = null;
 		for (String symbol : symbolList) {
@@ -123,58 +130,12 @@ public class FutureServiceImpl implements FutureService {
 		//executor.shutdown();
 	}
 
-	@Async
-	public void checkInterestStatistics(Long logId,String symbol){
-		LinkedHashMap<String, Object> parameters = new LinkedHashMap<>();
-
-		String proxyUrl = "https://proxy-52x6ddbv1-watimers-projects.vercel.app/";
-		String baseURL = "https/fapi.binance.com";
-
-		UMFuturesClientImpl client = new UMFuturesClientImpl();
-
-		parameters.put("symbol", symbol);
-		parameters.put("period", "5m");
-		parameters.put("limit",2);
-		try {
-			String result = client.market().openInterestStatistics(parameters);
-			// 转化结果
-			List<InterestHistVO> interestHistVOList = JSONArray.parseArray(result,InterestHistVO.class);
-			InterestHistVO previousInterestHistVO = null;
-			// 根据时间顺序，计算当前持仓量是否大于上一个交易单位的持仓量
-			for (int i = interestHistVOList.size(); i > 0; i--) {
-				if(i!=interestHistVOList.size()){
-					previousInterestHistVO = interestHistVOList.get(i);
-				}
-				InterestHistVO interestHistVO = interestHistVOList.get(i - 1);
-				log.info("日志ID:{},当前时间:{},标的:{},持仓量:{},持仓价值:{}",logId, interestHistVO.getSymbol(),DateTime.of(interestHistVO.getTimestamp()),interestHistVO.getSumOpenInterest(),interestHistVO.getSumOpenInterestValue());
-				if(null != previousInterestHistVO){
-					// 此处需要重新写计算规则
-					//synchronized (this) {
-						BigDecimal compareResult = interestHistVO.getSumOpenInterest().divide(previousInterestHistVO.getSumOpenInterest(),2,BigDecimal.ROUND_HALF_UP);
-						if(compareResult.compareTo(new BigDecimal("1.5")) > 0){
-							log.info("日志ID:{},当前时间:{},标的:{},价值增加",logId,interestHistVO.getSymbol(),DateTime.of(interestHistVO.getTimestamp()));
-							Boolean pushFlag = pushService.pushFeiShu(logId,interestHistVO.getSymbol(),
-									DateTime.of(interestHistVO.getTimestamp()).toString(),"", ExchangeEnum.EXCHANGE_BINANCE, PushEnum.FUTURES_OPEN_INTEREST_LONG);
-							if(pushFlag){
-								log.info("日志ID:{},标的:{},推送消息成功",logId,interestHistVO.getSymbol());
-							}
-						}
-					//}
-
-				}
-			}
-		} catch (BinanceConnectorException e) {
-			log.error("fullErrMessage: {}", e.getMessage(), e);
-		} catch (BinanceClientException e) {
-			log.error("fullErrMessage: {} \nerrMessage: {} \nerrCode: {} \nHTTPStatusCode: {}",
-					e.getMessage(), e.getErrMsg(), e.getErrorCode(), e.getHttpStatusCode(), e);
-		}
-	}
-
 	@Override
 	public List<String> getExchangeInfo(Long logId) {
 		List<String> resultList = new ArrayList<>();
-		UMFuturesClientImpl client = new UMFuturesClientImpl();
+		String proxyUrl = "https://trade1818.top/";
+		String baseURL = "https/fapi.binance.com";
+		UMFuturesClientImpl client = new UMFuturesClientImpl(PROXY_URL);
 
 		try {
 			String result = client.market().exchangeInfo();
@@ -203,8 +164,9 @@ public class FutureServiceImpl implements FutureService {
 	@Override
 	public void getRate(Long logId) {
 		LinkedHashMap<String, Object> parameters = new LinkedHashMap<>();
-
-		UMFuturesClientImpl client = new UMFuturesClientImpl();
+		String proxyUrl = "https://trade1818.top/";
+		String baseURL = "https/fapi.binance.com";
+		UMFuturesClientImpl client = new UMFuturesClientImpl(PROXY_URL);
 
 		try {
 			String result = client.market().fundingRate(parameters);

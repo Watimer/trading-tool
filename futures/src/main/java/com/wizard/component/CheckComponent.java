@@ -31,6 +31,12 @@ public class CheckComponent {
 	@Resource
 	PushService pushService;
 
+	@Value("${BINANCE.API_KEY}")
+	private String API_KEY;
+
+	@Value("${BINANCE.SECRET_KEY}")
+	private String SECRET_KEY;
+
 	@Value("${ADD_NUMBER}")
 	private String ADD_NUMBER;
 
@@ -41,7 +47,7 @@ public class CheckComponent {
 	public void checkInterestStatistics(Long logId,String symbol){
 		LinkedHashMap<String, Object> parameters = new LinkedHashMap<>();
 
-		UMFuturesClientImpl client = new UMFuturesClientImpl(PROXY_URL);
+		UMFuturesClientImpl client = new UMFuturesClientImpl(API_KEY,SECRET_KEY,PROXY_URL);
 
 		parameters.put("symbol", symbol);
 		parameters.put("period", "5m");

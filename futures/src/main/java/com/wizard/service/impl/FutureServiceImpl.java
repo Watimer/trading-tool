@@ -48,6 +48,12 @@ public class FutureServiceImpl implements FutureService {
 	@Resource
 	GlobalListComponent globalListComponent;
 
+	@Value("${BINANCE.API_KEY}")
+	private String API_KEY;
+
+	@Value("${BINANCE.SECRET_KEY}")
+	private String SECRET_KEY;
+
 	@Value("${PROXY.URL}")
 	private String PROXY_URL;
 
@@ -133,9 +139,7 @@ public class FutureServiceImpl implements FutureService {
 	@Override
 	public List<String> getExchangeInfo(Long logId) {
 		List<String> resultList = new ArrayList<>();
-		String proxyUrl = "https://trade1818.top/";
-		String baseURL = "https/fapi.binance.com";
-		UMFuturesClientImpl client = new UMFuturesClientImpl(PROXY_URL);
+		UMFuturesClientImpl client = new UMFuturesClientImpl(API_KEY,SECRET_KEY,PROXY_URL);
 
 		try {
 			String result = client.market().exchangeInfo();
@@ -164,9 +168,7 @@ public class FutureServiceImpl implements FutureService {
 	@Override
 	public void getRate(Long logId) {
 		LinkedHashMap<String, Object> parameters = new LinkedHashMap<>();
-		String proxyUrl = "https://trade1818.top/";
-		String baseURL = "https/fapi.binance.com";
-		UMFuturesClientImpl client = new UMFuturesClientImpl(PROXY_URL);
+		UMFuturesClientImpl client = new UMFuturesClientImpl(API_KEY,SECRET_KEY,PROXY_URL);
 
 		try {
 			String result = client.market().fundingRate(parameters);

@@ -2,9 +2,6 @@ package com.wizard.service.impl;
 
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.net.NetUtil;
-import cn.hutool.core.util.NumberUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpRequest;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -15,7 +12,7 @@ import com.wizard.common.enums.ExchangeEnum;
 import com.wizard.common.enums.PushEnum;
 import com.wizard.component.CheckComponent;
 import com.wizard.component.GlobalListComponent;
-import com.wizard.model.vo.InterestHistVO;
+import com.wizard.config.PrivateConfig;
 import com.wizard.model.vo.SymbolFundingRateVO;
 import com.wizard.push.serivce.PushService;
 import com.wizard.service.FutureService;
@@ -23,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
+import xlc.quant.data.indicator.calculator.BOLL;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
@@ -31,6 +28,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -113,27 +111,29 @@ public class FutureServiceImpl implements FutureService {
 	@Async
 	@Override
 	public void openInterestStatistics(Long logId) {
-		log.info("日志ID:{},进入合约持仓量计算方法",logId);
-		// TODO 以下方法需要抽取为公共方法,实现传入不同标的以及对应计算规则,动态计算是否符合通知条件
+		log.info("日志ID:{},计算合约持仓量-进入合约持仓量计算方法",logId);
+		// 以下方法需要抽取为公共方法,实现传入不同标的以及对应计算规则,动态计算是否符合通知条件
 		// 获取全部交易标的
 		List<String> symbolList = globalListComponent.getGlobalList();
 		if(symbolList.isEmpty()){
+			log.info("日志ID:{},计算合约持仓量-标的列表为空,流程结束",logId);
 			return;
 		}
-		ExecutorService executor = Executors.newFixedThreadPool(2);
-		CompletableFuture<Void> allOf = null;
-		for (String symbol : symbolList) {
-			//checkComponent.checkInterestStatistics(logId,symbol);
-			CompletableFuture<Void> future = CompletableFuture.runAsync(() ->
-							checkComponent.checkInterestStatistics(logId,symbol)
-					,executor);
-			allOf = CompletableFuture.allOf(future);
+		ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()*2);
+		symbolList.stream().forEach(symbol ->{
+			executor.submit(()->{
+				checkComponent.checkInterestStatistics(logId,symbol);
+			});
+		});
+		executor.shutdown();
+		try {
+			boolean terminated = executor.awaitTermination(30, TimeUnit.SECONDS);
+			if (!terminated) {
+				log.error("日志ID:{},计算合约持仓量-查询动态节点线程池在指定时间内未能成功关闭","");
+			}
+		} catch (InterruptedException e) {
+			log.error("日志ID:{},计算合约持仓量--查询动态节点 Error waiting for threads to finish:{}","",e.getMessage());
 		}
-
-		allOf.thenRun(executor::shutdown);
-		// 等待所有线程执行完成
-		allOf.join();
-		//executor.shutdown();
 	}
 
 	@Override
@@ -198,5 +198,23 @@ public class FutureServiceImpl implements FutureService {
 			log.error("fullErrMessage: {} \nerrMessage: {} \nerrCode: {} \nHTTPStatusCode: {}",
 					e.getMessage(), e.getErrMsg(), e.getErrorCode(), e.getHttpStatusCode(), e);
 		}
+	}
+
+	/**
+	 * 获取连续合约数据
+	 *
+	 * @param symbol 标的
+	 * @return
+	 */
+	@Override
+	public String getContinuousKLines(String symbol) {
+		String url = "/dapi/v1/continuousKlines";
+	    String targetUrl = PrivateConfig.CM_BASE_URL + url;
+		String params = "?pair="+symbol+"&contractType=PERPETUAL&interval=15m";
+		String result = HttpRequest.get(targetUrl+params).execute().body();
+		log.info("结果:{}",result);
+
+		//MarketQuotation marketQuotation = new MarketQuotation();
+		return result;
 	}
 }

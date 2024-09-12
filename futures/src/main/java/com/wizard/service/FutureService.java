@@ -29,4 +29,11 @@ public interface FutureService {
 	 * @param logId
 	 */
 	void getRate(Long logId);
+
+	/**
+	 * 获取连续合约数据
+	 * @param symbol 标的
+	 * @return
+	 */
+	String getContinuousKLines(String symbol);
 }

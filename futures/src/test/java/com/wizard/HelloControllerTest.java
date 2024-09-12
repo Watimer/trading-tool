@@ -1,5 +1,9 @@
 package com.wizard;
 
+import com.binance.connector.futures.client.WebsocketClient;
+import com.binance.connector.futures.client.impl.CMWebsocketClientImpl;
+import com.binance.connector.futures.client.impl.WebsocketClientImpl;
+import com.binance.connector.futures.client.utils.WebSocketConnection;
 import com.jayway.restassured.RestAssured;
 import org.junit.Before;
 import org.junit.Test;
@@ -9,6 +13,8 @@ import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
+
+import java.util.ArrayList;
 
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.RestAssured.when;

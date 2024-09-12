@@ -45,6 +45,7 @@ public class CheckComponent {
 
 	@Async
 	public void checkInterestStatistics(Long logId,String symbol){
+		log.info("日志ID:{},计算合约持仓量-当前标的:{},流程结束",logId,symbol);
 		LinkedHashMap<String, Object> parameters = new LinkedHashMap<>();
 
 		UMFuturesClientImpl client = new UMFuturesClientImpl(API_KEY,SECRET_KEY,PROXY_URL);
@@ -63,18 +64,18 @@ public class CheckComponent {
 					previousInterestHistVO = interestHistVOList.get(i);
 				}
 				InterestHistVO interestHistVO = interestHistVOList.get(i - 1);
-				log.info("日志ID:{},当前时间:{},标的:{},持仓量:{},持仓价值:{}",logId, interestHistVO.getSymbol(), DateTime.of(interestHistVO.getTimestamp()),interestHistVO.getSumOpenInterest(),interestHistVO.getSumOpenInterestValue());
+				log.info("日志ID:{},计算合约持仓量-当前时间:{},标的:{},持仓量:{},持仓价值:{}",logId, interestHistVO.getSymbol(), DateTime.of(interestHistVO.getTimestamp()),interestHistVO.getSumOpenInterest(),interestHistVO.getSumOpenInterestValue());
 				if(null != previousInterestHistVO){
 					// 此处需要重新写计算规则
 					//synchronized (this) {
 					BigDecimal compareResult = interestHistVO.getSumOpenInterest().divide(previousInterestHistVO.getSumOpenInterest(),2,BigDecimal.ROUND_HALF_UP);
-					log.info("日志ID:{},当前时间:{},标的:{},持仓量:{},计算结果:{}",logId,DateTime.of(interestHistVO.getTimestamp()),interestHistVO.getSymbol(),interestHistVO.getSumOpenInterest(),compareResult);
+					log.info("日志ID:{},计算合约持仓量-当前时间:{},标的:{},持仓量:{},计算结果:{}",logId,DateTime.of(interestHistVO.getTimestamp()),interestHistVO.getSymbol(),interestHistVO.getSumOpenInterest(),compareResult);
 					if(compareResult.compareTo(new BigDecimal(ADD_NUMBER)) >= 0){
-						log.info("日志ID:{},当前时间:{},标的:{},价值增加",logId,interestHistVO.getSymbol(),DateTime.of(interestHistVO.getTimestamp()));
+						log.info("日志ID:{},计算合约持仓量-当前时间:{},标的:{},价值增加",logId,interestHistVO.getSymbol(),DateTime.of(interestHistVO.getTimestamp()));
 						Boolean pushFlag = pushService.pushFeiShu(logId,interestHistVO.getSymbol(),
 								DateTime.of(interestHistVO.getTimestamp()).toString(),"", ExchangeEnum.EXCHANGE_BINANCE, PushEnum.FUTURES_OPEN_INTEREST_LONG);
 						if(pushFlag){
-							log.info("日志ID:{},标的:{},推送消息成功",logId,interestHistVO.getSymbol());
+							log.info("日志ID:{},计算合约持仓量-标的:{},推送消息成功",logId,interestHistVO.getSymbol());
 						}
 					}
 					//}

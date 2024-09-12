@@ -19,6 +19,11 @@
     </properties>
 
     <dependencies>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
@@ -36,6 +41,12 @@
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-extension</artifactId>
             <version>${mybatisplus.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.xianlaocai.quant</groupId>
+            <artifactId>quant-data-indicator</artifactId>
+            <version>XLCQ20240604</version>
         </dependency>
     </dependencies>
 

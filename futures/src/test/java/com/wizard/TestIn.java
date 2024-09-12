@@ -78,7 +78,7 @@ public class TestIn {
         IndicatorCalculator<MarketQuotation,BOLL> bollCalculator =BOLL.buildCalculator(400,2d,2,MarketQuotation::setBoll,MarketQuotation::getBoll);
         listMarketQuotationOrderByCloseTimeAsc.stream().forEach(item ->{
             BOLL boll = bollCalculator.input(item);
-            System.out.println(boll);
+//            System.out.println(boll);
         });
     }
 
@@ -95,13 +95,13 @@ public class TestIn {
         for (MarketQuotation mq : listMarketQuotationOrderByCloseTimeAsc) {
             calculateManager.accept(mq);
         }
-
-        List<IndicatorCalculator<MarketQuotation, ?>> collect = calculatorConfig.stream().collect(Collectors.toList());
-        collect.stream().forEach(item ->{
-            item.getDataList().stream().forEach(temp ->{
-                temp.setBoll(new BOLL(400d,2d,2d,1));
-                System.out.println(item.input(temp));
-            });
+        List<MarketQuotation> dataList = calculateManager.getDataList();
+        dataList.stream().forEach(item ->{
+            System.out.println(item.getKdj());
+            System.out.println(item.getMacd());
+            System.out.println(item.getBoll());
+            System.out.println(item.getEma60());
+            System.out.println(item.getMa60());
         });
 
     }

@@ -97,11 +97,7 @@ public class TestIn {
         }
         List<MarketQuotation> dataList = calculateManager.getDataList();
         dataList.stream().forEach(item ->{
-            System.out.println(item.getKdj());
-            System.out.println(item.getMacd());
             System.out.println(item.getBoll());
-            System.out.println(item.getEma60());
-            System.out.println(item.getMa60());
         });
 
     }
@@ -118,7 +114,7 @@ public class TestIn {
         // MACD-计算器
         indicatorCalculatorList.add(MACD.buildCalculator(12, 26, 9,indicatorSetScale,MarketQuotation::setMacd,MarketQuotation::getMacd));
         // BOLL-计算器
-        indicatorCalculatorList.add(BOLL.buildCalculator(20, 2,indicatorSetScale,MarketQuotation::setBoll,MarketQuotation::getBoll));
+        indicatorCalculatorList.add(BOLL.buildCalculator(400, 2,indicatorSetScale,MarketQuotation::setBoll,MarketQuotation::getBoll));
         // DMI-计算
         indicatorCalculatorList.add(DMI.buildCalculator(14, 6,MarketQuotation::setDmi,MarketQuotation::getDmi));
 

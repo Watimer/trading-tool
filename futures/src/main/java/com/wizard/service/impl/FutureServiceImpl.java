@@ -17,6 +17,8 @@ import com.wizard.model.vo.SymbolFundingRateVO;
 import com.wizard.push.serivce.PushService;
 import com.wizard.service.FutureService;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.OkHttp;
+import okhttp3.OkHttpClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,7 @@ import xlc.quant.data.indicator.calculator.BOLL;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.net.Proxy;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -211,10 +214,13 @@ public class FutureServiceImpl implements FutureService {
 		String url = "/dapi/v1/continuousKlines";
 	    String targetUrl = PrivateConfig.CM_BASE_URL + url;
 		String params = "?pair="+symbol+"&contractType=PERPETUAL&interval=15m";
-		String result = HttpRequest.get(targetUrl+params).execute().body();
+		String resultUrl = targetUrl+params;
+		log.info("开始请求,目标地址:{}",resultUrl);
+
+		String result = HttpRequest.get(resultUrl).execute().body();
 		log.info("结果:{}",result);
 
-		//MarketQuotation marketQuotation = new MarketQuotation();
+//		MarketQuotation marketQuotation = new MarketQuotation();
 		return result;
 	}
 }

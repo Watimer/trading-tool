@@ -1,4 +1,4 @@
-package com.wizard.model.vo;
+package com.wizard.controller;
 
 import com.wizard.service.FutureService;
 import lombok.extern.slf4j.Slf4j;

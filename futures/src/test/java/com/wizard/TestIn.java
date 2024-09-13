@@ -42,6 +42,7 @@ public class TestIn {
         multipleIndicatorCalculate(listMarketQuotationOrderByCloseTimeAsc,1);
 
         Core core = new Core();
+        int macdLockBack1 = core.macdLookback(12,26,9);
         int startIndex = 0;
         int entIndex = listMarketQuotationOrderByCloseTimeAsc.size()-1;
         double[] closePrice = new double[listMarketQuotationOrderByCloseTimeAsc.size()];
@@ -72,6 +73,9 @@ public class TestIn {
             }
             log.info("listMacdss:{}", JSONObject.toJSONString(listMacdss));
         }
+        int macdLockBack = core.macdLookback(12,26,9);
+        System.out.println(macdLockBack1);
+        System.out.println(macdLockBack);
     }
 
     private static MarketQuotation getMarketQuotation(JSONArray jsonItem){

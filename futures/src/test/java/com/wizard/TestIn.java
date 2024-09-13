@@ -4,6 +4,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.io.FileUtil;
 import com.alibaba.fastjson.JSONArray;
+import com.tictactec.ta.lib.Core;
 import xlc.quant.data.indicator.IndicatorCalculateCarrier;
 import xlc.quant.data.indicator.IndicatorCalculator;
 import xlc.quant.data.indicator.IndicatorWarehouseManager;
@@ -33,6 +34,10 @@ public class TestIn {
         singleIndicatorCalculate(listMarketQuotationOrderByCloseTimeAsc);
 
         multipleIndicatorCalculate(listMarketQuotationOrderByCloseTimeAsc,1);
+
+        Core core = new Core();
+
+        core.macdLookback(12, 26, 9);
     }
 
     private static MarketQuotation getMarketQuotation(JSONArray jsonItem){

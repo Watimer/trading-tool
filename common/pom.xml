@@ -48,6 +48,12 @@
             <artifactId>quant-data-indicator</artifactId>
             <version>XLCQ20240604</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.tictactec</groupId>
+            <artifactId>ta-lib</artifactId>
+            <version>0.4.0</version>
+        </dependency>
     </dependencies>
 
 </project>

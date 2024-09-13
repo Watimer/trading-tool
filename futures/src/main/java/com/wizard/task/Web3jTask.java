@@ -42,12 +42,8 @@ public class Web3jTask {
 				DefaultBlockParameter.valueOf(BigInteger.ONE));
 		BigInteger integer =  ethGetBalanceRequest.send().getBalance();
 		System.out.println(integer);
-		EthFilter filter = new EthFilter(
-				DefaultBlockParameterName.EARLIEST,
-				DefaultBlockParameterName.LATEST,
-				tokenContractAddress
-		);
-		EthFilter filter1 = new EthFilter();
+
+		EthFilter filter1 = new EthFilter(DefaultBlockParameterName.EARLIEST,DefaultBlockParameterName.LATEST,tokenContractAddress);
 		List<EthLog.LogResult> logs = null;
 		try {
 			Request<?, EthLog> ethLogRequest = web3j.ethGetLogs(filter1);

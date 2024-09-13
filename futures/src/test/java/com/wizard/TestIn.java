@@ -4,23 +4,29 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.io.FileUtil;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.tictactec.ta.lib.Core;
+import com.tictactec.ta.lib.MInteger;
+import com.tictactec.ta.lib.RetCode;
+import lombok.Data;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import xlc.quant.data.indicator.IndicatorCalculateCarrier;
 import xlc.quant.data.indicator.IndicatorCalculator;
 import xlc.quant.data.indicator.IndicatorWarehouseManager;
 import xlc.quant.data.indicator.calculator.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class TestIn {
 
+    private static final Logger log = LoggerFactory.getLogger(TestIn.class);
+
     public static void main(String[] args) {
-        String source = FileUtil.readUtf8String("D:\\wizard\\trading-tool\\futures\\src\\test\\java\\com\\wizard\\line.txt");
+        String source = FileUtil.readUtf8String("/Users/yueyaoli/wizard/trading-tool/futures/src/test/java/com/wizard/line.txt");
         JSONArray jsonArray = JSONArray.parseArray(source);
         //行情数据
         List<MarketQuotation> listMarketQuotation = new ArrayList<>();
@@ -36,8 +42,36 @@ public class TestIn {
         multipleIndicatorCalculate(listMarketQuotationOrderByCloseTimeAsc,1);
 
         Core core = new Core();
+        int startIndex = 0;
+        int entIndex = listMarketQuotationOrderByCloseTimeAsc.size()-1;
+        double[] closePrice = new double[listMarketQuotationOrderByCloseTimeAsc.size()];
+        for (int i= 0;i<listMarketQuotationOrderByCloseTimeAsc.size();i++) {
+            closePrice[i] = listMarketQuotationOrderByCloseTimeAsc.get(i).getClose();
+        }
+        //MInteger类: mutable integer，可变整数
+        MInteger begin = new MInteger();
+        MInteger length = new MInteger();
+        double[] outMacd = new double[entIndex];
+        double[] outMacdSignal = new double[entIndex];
+        double[] outMacdHist = new double[entIndex];
+        RetCode retCode = core.macd(startIndex,entIndex,closePrice,12,26,9,begin,length,outMacd,outMacdSignal,outMacdHist);
+        if(retCode == RetCode.Success){
+            log.info("begin:{}",begin);
+            log.info("length:{}",length);
+            List<Macdss> listMacdss = new ArrayList<>();
+            for (int i= 0;i<outMacd.length;i++) {
+                Macdss macdss = new Macdss();
+                macdss.setIndex(i);
+                macdss.setFast(new BigDecimal(outMacd[i]));
+                macdss.setLow(new BigDecimal(outMacdSignal[i]));
+                macdss.setWw(new BigDecimal(outMacdHist[i]));
+                if(macdss.getFast().compareTo(new BigDecimal("0")) != 0){
+                    listMacdss.add(macdss);
+                }
 
-        core.macdLookback(12, 26, 9);
+            }
+            log.info("listMacdss:{}", JSONObject.toJSONString(listMacdss));
+        }
     }
 
     private static MarketQuotation getMarketQuotation(JSONArray jsonItem){
@@ -160,4 +194,14 @@ public class TestIn {
 
         return indicatorCalculatorList;
     }
+}
+
+@Data
+class Macdss {
+    private BigDecimal fast;
+    private BigDecimal low;
+
+    private BigDecimal ww;
+
+    private Integer index;
 }

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 日志级别从低到高分为 TRACE < DEBUG < INFO < WARN < ERROR < FATAL，如果
+设置为 WARN，则低于 WARN 的信息都不会输出 -->
+<!-- scan:当此属性设置为 true 时，配置文件如果发生改变，将会被重新加载，默认值为
+true -->
+<!-- scanPeriod:设置监测配置文件是否有修改的时间间隔，如果没有给出时间单位，默认
+单位是毫秒。当 scan 为 true 时，此属性生效。默认的时间间隔为 1 分钟。 -->
+<!-- debug:当此属性设置为 true 时，将打印出 logback 内部日志信息，实时查看 logback
+运行状态。默认值为 false。通常不打印 -->
+<configuration scan="true" scanPeriod="10 seconds">
+    <!--读取yml文件中的日志配置-->
+    <springProperty name="YML_LOG_PATH" source="LOG_PATH"/>
+    <springProperty name="SERVER_NAME" source="spring.application.name"/>
+    <property name="BASE_PATH" value="${YML_LOG_PATH}"/>
+    <!--输出路径-->
+    <property name="CLASSPATH" value="logs"/>
+    <property name="PROJECT_NAME" value="${SERVER_NAME}"/>
+
+    <!-- 彩色日志依赖的渲染类 -->
+    <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter" />
+    <conversionRule conversionWord="wex" converterClass="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter" />
+    <conversionRule conversionWord="wEx" converterClass="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter" />
+    <!-- 彩色日志格式 -->
+    <property name="CONSOLE_LOG_PATTERN" value="${CONSOLE_LOG_PATTERN:-%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}"/>
+
+    <!--输出到控制台-->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <!--此日志 appender 是为开发使用，只配置最底级别，控制台输出的日志级别是大于或等于此级别的日志信息-->
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>info,debug</level>
+        </filter>
+        <encoder>
+            <Pattern>${CONSOLE_LOG_PATTERN}</Pattern>
+            <!-- 设置字符集 -->
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+    <!--输出到文件中-->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${BASE_PATH}${CLASSPATH}/${PROJECT_NAME}/${SERVER_NAME}.log</file>
+        <encoder>
+            <pattern>[%date{yyyy-MM-dd HH:mm:ss SSS}] [%-5level] [${PID:- }] [%logger:%line] --%mdc{client} %msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+        <!-- 添加.gz 历史日志会启用压缩 大大缩小日志文件所占空间 -->
+            <fileNamePattern>${BASE_PATH}${CLASSPATH}/${PROJECT_NAME}/${SERVER_NAME}.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>50MB</maxFileSize>
+            <maxHistory>30</maxHistory><!-- 保留 30 天日志 -->
+        </rollingPolicy>
+    </appender>
+    <!--单个定义，需要指定哪个包输出日志-->
+    <logger name="com.abc.springboot.mapper" level="DEBUG" />
+    <!--
+        如果root标签知道指定了日志级别，那么以根标签为准，没有则以当前追加器日志级别为准
+        如果root没有值，则默认是debug级别
+    -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </root>
+    <!--有效优先级别：root > logger > appender-->
+
+</configuration>

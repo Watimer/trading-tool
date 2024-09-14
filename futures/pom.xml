@@ -15,24 +15,6 @@
     </parent>
 
     <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-
         <!--公用依赖包-->
         <dependency>
             <groupId>com.wizard</groupId>
@@ -53,15 +35,6 @@
             <artifactId>binance-futures-connector-java</artifactId>
             <version>3.0.4</version>
         </dependency>
-
-        <dependency>
-            <groupId>com.xianlaocai.quant</groupId>
-            <artifactId>quant-data-indicator</artifactId>
-            <version>XLCQ20240604</version>
-        </dependency>
-
-
-
     </dependencies>
     <build>
         <plugins>

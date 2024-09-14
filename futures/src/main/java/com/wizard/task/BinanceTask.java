@@ -9,6 +9,7 @@ import com.wizard.service.FutureService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import javax.annotation.Resource;
@@ -23,7 +24,7 @@ import java.util.List;
  */
 @Slf4j
 @Configuration
-//@EnableScheduling
+@EnableScheduling
 public class BinanceTask {
 
 	@Resource
@@ -69,20 +70,20 @@ public class BinanceTask {
 		log.info("日志ID:{},完成检测当前资金费率",logId);
 	}
 
-	public static void main(String[] args) {
-		UMWebsocketClientImpl client = new UMWebsocketClientImpl();
-		List<String> lookList = Arrays.asList("BTCUSDT","ETHUSDT","SOLUSDT","BNBUSDT");
-		client.allTickerStream(event->{
-			List<KLine> kLines = JSONArray.parseArray(event.toString(),KLine.class);
-			kLines.stream().forEach(item->{
-				// 标的
-				String symbol = item.getS();
-				// 当前价格
-				String currentPrice = item.getC();
-				if(lookList.contains(symbol)){
-					System.out.println(DateUtil.now()+", 标的:【"+symbol+"】, 当前价格:【"+currentPrice+"】");
-				}
-			});
-		});
-	}
+	//public static void main(String[] args) {
+	//	UMWebsocketClientImpl client = new UMWebsocketClientImpl();
+	//	List<String> lookList = Arrays.asList("BTCUSDT","ETHUSDT","SOLUSDT","BNBUSDT");
+	//	client.allTickerStream(event->{
+	//		List<KLine> kLines = JSONArray.parseArray(event.toString(),KLine.class);
+	//		kLines.stream().forEach(item->{
+	//			// 标的
+	//			String symbol = item.getS();
+	//			// 当前价格
+	//			String currentPrice = item.getC();
+	//			if(lookList.contains(symbol)){
+	//				System.out.println(DateUtil.now()+", 标的:【"+symbol+"】, 当前价格:【"+currentPrice+"】");
+	//			}
+	//		});
+	//	});
+	//}
 }

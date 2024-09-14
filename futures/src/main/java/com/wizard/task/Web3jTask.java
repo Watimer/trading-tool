@@ -29,7 +29,11 @@ import java.util.List;
 @EnableScheduling
 public class Web3jTask {
 
-	public static void main(String[] args) throws IOException {
+	//public static void main(String[] args) throws IOException {
+	//	extracted();
+	//}
+
+	private static void extracted() throws IOException {
 		Web3j web3j = null;
 		try {
 			Web3jService web3jService = new HttpService("https://mainnet.infura.io/v3/370a89b064e84f999db395e561dc60b6");

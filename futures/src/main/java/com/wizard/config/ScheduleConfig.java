@@ -27,8 +27,8 @@ public class ScheduleConfig implements SchedulingConfigurer {
 	@Override
 	public void configureTasks(ScheduledTaskRegistrar scheduledTaskRegistrar) {
 		ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
-		taskScheduler.setPoolSize(20);
-		taskScheduler.setThreadNamePrefix("TRADING-SCHEDULE-");
+		taskScheduler.setPoolSize(10);
+		taskScheduler.setThreadNamePrefix("TRADING-");
 		// 设置超时时间为5分钟
 		taskScheduler.setAwaitTerminationSeconds(300);
 		taskScheduler.setErrorHandler(t -> {

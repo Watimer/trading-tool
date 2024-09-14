@@ -10,11 +10,10 @@ true -->
 <configuration scan="true" scanPeriod="10 seconds">
     <!--读取yml文件中的日志配置-->
     <springProperty name="YML_LOG_PATH" source="LOG_PATH"/>
-    <springProperty name="SERVER_NAME" source="spring.application.name"/>
     <property name="BASE_PATH" value="${YML_LOG_PATH}"/>
     <!--输出路径-->
     <property name="CLASSPATH" value="logs"/>
-    <property name="PROJECT_NAME" value="${SERVER_NAME}"/>
+    <property name="PROJECT_NAME" value="futures"/>
 
     <!-- 彩色日志依赖的渲染类 -->
     <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter" />
@@ -37,13 +36,13 @@ true -->
     </appender>
     <!--输出到文件中-->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${BASE_PATH}${CLASSPATH}/${PROJECT_NAME}/${SERVER_NAME}.log</file>
+        <file>${BASE_PATH}${CLASSPATH}/${PROJECT_NAME}/futures.log</file>
         <encoder>
             <pattern>[%date{yyyy-MM-dd HH:mm:ss SSS}] [%-5level] [${PID:- }] [%logger:%line] --%mdc{client} %msg%n</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
         <!-- 添加.gz 历史日志会启用压缩 大大缩小日志文件所占空间 -->
-            <fileNamePattern>${BASE_PATH}${CLASSPATH}/${PROJECT_NAME}/${SERVER_NAME}.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>${BASE_PATH}${CLASSPATH}/${PROJECT_NAME}/futures.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <maxFileSize>50MB</maxFileSize>
             <maxHistory>30</maxHistory><!-- 保留 30 天日志 -->
         </rollingPolicy>

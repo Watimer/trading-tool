@@ -34,5 +34,5 @@ BINANCE:
 # 持仓变动
 ADD_NUMBER: 1.05
 
-# LOG_PATH: /Users/yueyaoli/Documents/中科睿见/本地项目日志/
-LOG_PATH: /monitor/
+LOG_PATH: /Users/yueyaoli/Documents/中科睿见/本地项目日志/
+#LOG_PATH: /monitor/

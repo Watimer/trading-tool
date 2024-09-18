@@ -28,9 +28,8 @@
         <hutool.version>5.8.16</hutool.version>
         <mybatisplus.version>3.4.3</mybatisplus.version>
         <mysql.version>5.1.33</mysql.version>
+        <ta.version>0.4.0</ta.version>
+        <quant.version>XLCQ20240604</quant.version>
+        <web3j.version>5.0.0</web3j.version>
     </properties>
-
-    <dependencies>
-
-    </dependencies>
 </project>

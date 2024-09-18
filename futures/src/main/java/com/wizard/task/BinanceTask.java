@@ -32,7 +32,7 @@ public class BinanceTask {
 	 * 计算币安合约持仓量
 	 * 从零时开始,每五分钟执行一次
 	 */
-	@Scheduled(cron = "* 0/5 0/1 * * ? ")
+	//@Scheduled(cron = "* 0/5 0/1 * * ? ")
 	public void openInterestStatistics(){
 		Long logId = IdWorker.getId();
 		log.info("日志ID:{},开始检测合约持仓量是否存在异动",logId);

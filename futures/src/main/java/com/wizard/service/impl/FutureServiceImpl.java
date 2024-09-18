@@ -150,7 +150,13 @@ public class FutureServiceImpl implements FutureService {
 			JSONArray jsonArray = jsonObject.getJSONArray("symbols");
 			for (int i = 0; i < jsonArray.size(); i++) {
 				JSONObject jsonObject1 = jsonArray.getJSONObject(i);
-				resultList.add(jsonObject1.getString("symbol"));
+				// 获取合约类型
+				String contractType = jsonObject1.getString("contractType");
+				// 获取交易对名称
+				String symbol = jsonObject1.getString("symbol");
+				if("PERPETUAL".equals(contractType)&& !symbol.contains("USDC") && symbol.contains("USDT")){
+					resultList.add(symbol);
+				}
 			}
 			log.info("日志ID:{},当前标的数量:{}",logId,resultList.size());
 		} catch (BinanceConnectorException e) {

@@ -1,13 +1,20 @@
 package com.wizard.service.impl;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.http.HttpRequest;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.wizard.model.vo.TradingViewStrongSymbolVO;
+import com.wizard.push.serivce.PushService;
 import com.wizard.service.TradingViewService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author 岳耀栎
@@ -18,6 +25,8 @@ import javax.servlet.http.HttpServletRequest;
 @Service
 public class TradingViewServiceImpl implements TradingViewService {
 
+	@Resource
+	PushService pushService;
 
 	private String cok = "cookiePrivacyPreferenceBannerProduction=accepted; cookiesSettings={\"analytics\":true,\"advertising\":true}; _ga=GA1.1.134239995.1655090829; __gads=ID=80abeb8b8917d197:T=1689869744:RT=1700469334:S=ALNI_MZMk-5I6TuILfSxJ85vajeqbCHFSA; __gpi=UID=00000c22b48781fa:T=1689869744:RT=1700469334:S=ALNI_MarxMpLw9j3Zt8d0v9XC7aZvDC7vg; theme=dark; _ga_R53B6WMR8T=GS1.1.1712556222.3.1.1712556326.0.0.0; _ga_53M0R0ZT9V=GS1.1.1712556222.3.1.1712556326.0.0.0; device_t=dUtMRjox.cJiuwKDgZvh22N8e7pifIjq0lWu8tTt-UfS9ZLGN2Vs; sessionid=koir183bd5v15os9ck9kf093wmr4swhk; sessionid_sign=v2:aOLdqzwfMTzQ5mEL++pcvSKOjktc6tiyxrXoMtgK7ks=; tv_ecuid=da66e945-3230-45db-a827-b7ce52e5f5c2; _sp_ses.cf1a=*; _sp_id.cf1a=bce98ec1-dfd9-4862-9e76-68857698e196.1703693658.121.1717384986.1716990319.fa1c0945-c1a9-46ba-964e-ce3739b3a10f; _ga_YVVRYGL0E0=GS1.1.1717384986.304.0.1717384986.60.0.0";
 
@@ -38,8 +47,29 @@ public class TradingViewServiceImpl implements TradingViewService {
 				.body();
 
 		log.info("日志ID:{},结果:{}",logId,result);
+		List<TradingViewStrongSymbolVO> stringList = new ArrayList<>();
 		// 解析返回结果
 		JSONObject jsonResult = JSONObject.parseObject(result);
-
+		List<JSONObject> dataList = jsonResult.getJSONArray("data").toJavaList(JSONObject.class);
+		Integer level = 1;
+		for (JSONObject jsonObject : dataList) {
+		    JSONArray jsonArray = jsonObject.getJSONArray("d");
+			String symbol = jsonArray.getString(0);
+			TradingViewStrongSymbolVO  tradingViewStrongSymbolVO = new TradingViewStrongSymbolVO();
+			tradingViewStrongSymbolVO.setSymbol(symbol);
+			tradingViewStrongSymbolVO.setLevel(level);
+			level++;
+			stringList.add(tradingViewStrongSymbolVO);
+		}
+		if(!stringList.isEmpty()){
+			StringBuffer stringBuffer = new StringBuffer();
+			stringBuffer.append("警报类型:推送强势标的").append("\n");
+			// 推送飞书
+			for (TradingViewStrongSymbolVO tradingViewStrongSymbolVO : stringList){
+				stringBuffer.append("标的:").append(tradingViewStrongSymbolVO.getSymbol()).append(",优先级:").append(tradingViewStrongSymbolVO.getLevel()).append("\n");
+			}
+			stringBuffer.append("时间:").append(DateUtil.now());
+			pushService.pushManySymbol(logId,stringBuffer.toString());
+		}
 	}
 }

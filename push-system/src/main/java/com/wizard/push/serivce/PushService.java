@@ -11,4 +11,6 @@ import com.wizard.common.enums.PushEnum;
 public interface PushService {
 
 	Boolean pushFeiShu(Long logId, String symbol, String dateTime, String title, ExchangeEnum exchangeEnum, PushEnum pushEnum);
+
+	Boolean pushManySymbol(Long logId,String context);
 }

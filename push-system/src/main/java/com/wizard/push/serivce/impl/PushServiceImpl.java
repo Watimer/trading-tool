@@ -62,4 +62,29 @@ public class PushServiceImpl implements PushService {
 		}
 		return resultFlag;
 	}
+
+	@Override
+	public Boolean pushManySymbol(Long logId, String context) {
+		Boolean resultFlag = Boolean.FALSE;
+		com.alibaba.fastjson.JSONObject jsonObject = new com.alibaba.fastjson.JSONObject();
+		jsonObject.put("msg_type","text");
+		com.alibaba.fastjson.JSONObject jsonObjectContent = new com.alibaba.fastjson.JSONObject();
+		jsonObjectContent.put("text",context);
+		jsonObject.put("content",jsonObjectContent);
+		// 调用飞书机器人接口
+		String feiShuResult = HttpRequest.post(FS_WEBHOOK_URL)
+				.header("Content-Type", "application/json")
+				.body(jsonObject.toString())
+				.execute()
+				.body();
+		JSONObject jsonFeiShu = JSONObject.parseObject(feiShuResult);
+		log.info("日志ID:{},本机IP:{},飞书机器人返回信息:{}",logId, NetUtil.localIpv4s().toString(),feiShuResult);
+		if(0==jsonFeiShu.getInteger("StatusCode")){
+			log.info("日志ID:{},消息发送成功",logId);
+			resultFlag = Boolean.TRUE;
+		} else {
+			log.error("日志ID:{},消息发送失败",logId);
+		}
+		return resultFlag;
+	}
 }

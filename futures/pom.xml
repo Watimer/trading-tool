@@ -48,6 +48,20 @@
                         <version>${spring-loaded.version}</version>
                     </dependency>
                 </dependencies>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                        <configuration>
+                            <!-- 把可执行的jar包添加前缀-->
+                            <classifier>exec</classifier>
+                        </configuration>
+                    </execution>
+                </executions>
+<!--                <configuration>-->
+<!--                    <executable>true</executable>-->
+<!--                </configuration>-->
             </plugin>
         </plugins>
     </build>

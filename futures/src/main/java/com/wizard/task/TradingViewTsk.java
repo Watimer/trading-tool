@@ -22,7 +22,7 @@ public class TradingViewTsk {
 	@Resource
 	TradingViewService tradingViewService;
 
-	@Scheduled(fixedRate = 60000)
+	//@Scheduled(fixedRate = 60000)
 	public void scan(){
 		Long logId = IdWorker.getId();
 		log.info("日志ID:{},开始检测强势标的",logId);

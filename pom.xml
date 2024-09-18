@@ -27,6 +27,7 @@
         <fastjson.version>2.0.4</fastjson.version>
         <hutool.version>5.8.16</hutool.version>
         <mybatisplus.version>3.4.3</mybatisplus.version>
+        <mysql.version>5.1.33</mysql.version>
     </properties>
 
     <dependencies>

@@ -5,6 +5,19 @@ server:
 spring:
   application:
     name: futures
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://101.32.126.44:3306/trade?useUnicode=true&characterEncoding=utf-8&useSSL=false&useAffectedRows=true&autoReconnect=true
+    username: trade
+    password: 123456
+    hikari:
+      connection-test-query: SELECT 1 FROM DUAL
+      connection-timeout: 600000
+      maximum-pool-size: 500
+      max-lifetime: 1800000
+      minimum-idle: 20
+      validation-timeout: 3000
+      idle-timeout: 60000
 
 # 飞书配置
 FEISHU:
@@ -19,6 +32,7 @@ BINANCE:
   SECRET_KEY: 11NjXeXSV3onWKtKmwpG3HTRwp9v86jg54zruGYhX4nJc0n7vLfmYxHAc2S6jVrt
 
 # 持仓变动
-ADD_NUMBER: 1.2
+ADD_NUMBER: 1.05
 
-LOG_PATH: /Users/yueyaoli/Documents/中科睿见/本地项目日志/
+# LOG_PATH: /Users/yueyaoli/Documents/中科睿见/本地项目日志/
+LOG_PATH: /monitor/

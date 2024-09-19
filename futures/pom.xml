@@ -68,7 +68,7 @@
                     <dependency>
                         <groupId>org.springframework</groupId>
                         <artifactId>springloaded</artifactId>
-                        <version>${spring-loaded.version}</version>
+                        <version>1.2.8.RELEASE</version>
                     </dependency>
                 </dependencies>
                 <executions>

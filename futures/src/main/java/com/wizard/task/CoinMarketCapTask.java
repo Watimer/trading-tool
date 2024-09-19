@@ -42,7 +42,7 @@ public class CoinMarketCapTask {
 	@Resource
 	SymbolInfoService symbolInfoService;
 
-	@Scheduled(fixedRate = 60000)
+	//@Scheduled(fixedRate = 60000)
 	public void queryVolumeTask(){
 		Long logId = IdWorker.getId();
 		List<String> symbolList = new ArrayList<>();
@@ -56,8 +56,14 @@ public class CoinMarketCapTask {
 			log.info("日志ID:{},标的:{},睡眠时间:{}",logId,symbol,i);
 			ThreadUtil.sleep(i, TimeUnit.SECONDS);
 			log.info("日志ID:{},标的:{},开始执行",logId,symbol);
-			getSymbolVolume(logId,symbol);
-			log.info("日志ID:{},标的:{},执行完成。",logId,symbol);
+			try {
+				getSymbolVolume(logId,symbol);
+				log.info("日志ID:{},标的:{},执行完成。",logId,symbol);
+			} catch (Exception e) {
+				log.error("日志ID:{},标的:{},执行失败。",logId,symbol);
+				log.error("{}",e);
+			}
+
 		}
 	}
 
@@ -114,7 +120,7 @@ public class CoinMarketCapTask {
 			volumeInfoPo.setLevel("24h");
 			volumeInfoPoList.add(volumeInfoPo);
 		}
-		log.info("日志ID:{},查询交易量-标的:{},待添加信息:{}",logId,symbol, JSONObject.toJSONString(volumeInfoPoList));
+		log.info("日志ID:{},查询交易量-标的:{},完成:{}",logId,symbol, JSONObject.toJSONString(volumeInfoPoList));
 		volumeInfoService.saveBatch(logId, volumeInfoPoList);
 	}
 }

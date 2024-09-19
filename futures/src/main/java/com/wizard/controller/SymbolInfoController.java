@@ -45,4 +45,21 @@ public class SymbolInfoController {
 		}
 		return resultInfo;
 	}
+
+	/**
+	 * 同步所有的标的
+	 * @return
+	 */
+	@RequestMapping(value = "/syncSymbolInfo",method = RequestMethod.GET)
+	public ResultInfo<Boolean> syncSymbolInfo() {
+		ResultInfo<Boolean> resultInfo = ResultInfoUtil.buildError(ApiConstant.ERROR_MESSAGE);
+		try {
+			if(symbolInfoService.syncSymbolInfo(IdWorker.getId())){
+				resultInfo = ResultInfoUtil.buildSuccess(null,Boolean.TRUE);
+			}
+		} catch (Exception e) {
+			resultInfo = ResultInfoUtil.buildErrorMsg(e.getMessage());
+		}
+		return resultInfo;
+	}
 }

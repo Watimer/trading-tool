@@ -29,4 +29,6 @@ public interface SymbolInfoService {
 	SymbolInfoPo getSymbolInfo(String symbol);
 
 	List<SymbolInfoPo> listSymbolInfoPo(Long logId, LambdaQueryWrapper<SymbolInfoPo> queryWrapper);
+
+	boolean syncSymbolInfo(long id);
 }

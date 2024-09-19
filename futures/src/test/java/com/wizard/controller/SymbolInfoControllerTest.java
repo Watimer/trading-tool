@@ -1,5 +1,6 @@
 package com.wizard.controller;
 
+import cn.hutool.core.date.DateTime;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.wizard.common.constants.ApiConstant;
@@ -23,7 +24,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -74,7 +74,7 @@ public class SymbolInfoControllerTest {
 				.id(IdWorker.getId())
 				.symbolName("Solana")
 				.symbol("SOL")
-				.createTime(LocalDateTime.now())
+				.createTime(DateTime.now())
 				.institution("FTX")
 				.content("SBF")
 				.tags("SBF,FTX,SOL").build();

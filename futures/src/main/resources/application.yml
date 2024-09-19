@@ -19,6 +19,22 @@ spring:
       validation-timeout: 3000
       idle-timeout: 60000
 
+# mybatis-plus配置信息
+mybatis-plus:
+  global-config:
+    db-config:
+      insert-strategy: ignored
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true
+    poolMaximumActiveConnections: 100
+    poolMaximumIdleConnections: 20
+    poolTimeToWait: 10
+
+logging:
+  config: classpath:logback-config.xml
+  level:
+    com.wizard.mapper: debug
 
 # 飞书配置
 FEISHU:

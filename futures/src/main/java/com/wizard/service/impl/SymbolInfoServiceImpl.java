@@ -51,7 +51,7 @@ public class SymbolInfoServiceImpl extends ServiceImpl<SymbolInfoMapper, SymbolI
 			item.setDelFlag(0);
 		});
 		log.info("日志ID:{},添加信息:{}",logId, JSONObject.toJSONString(list));
-		return saveBatch(list,10);
+		return saveBatch(list,100);
 	}
 
 	/**
@@ -76,6 +76,7 @@ public class SymbolInfoServiceImpl extends ServiceImpl<SymbolInfoMapper, SymbolI
 		String result = HttpRequest.get(URL)
 				.header("X-CMC_PRO_API_KEY","53aad728-b547-4fca-a78c-b5d2479de5ea")
 				.contentType("application/json")
+//				.setHttpProxy("127.0.0.1",7897)
 				.charset(CharsetUtil.UTF_8)
 				.execute()
 				.body();

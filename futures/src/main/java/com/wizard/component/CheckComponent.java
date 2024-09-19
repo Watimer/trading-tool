@@ -58,6 +58,8 @@ public class CheckComponent {
 			// 转化结果
 			List<InterestHistVO> interestHistVOList = JSONArray.parseArray(result,InterestHistVO.class);
 			InterestHistVO previousInterestHistVO = null;
+			StringBuffer stringBuffer = new StringBuffer();
+			stringBuffer.append("警报类型:合约持仓量").append("\n");
 			// 根据时间顺序，计算当前持仓量是否大于上一个交易单位的持仓量
 			for (int i = interestHistVOList.size(); i > 0; i--) {
 				if(i!=interestHistVOList.size()){
@@ -65,23 +67,28 @@ public class CheckComponent {
 				}
 				InterestHistVO interestHistVO = interestHistVOList.get(i - 1);
 				log.info("日志ID:{},计算合约持仓量-当前时间:{},标的:{},持仓量:{},持仓价值:{}",logId, interestHistVO.getSymbol(), DateTime.of(interestHistVO.getTimestamp()),interestHistVO.getSumOpenInterest(),interestHistVO.getSumOpenInterestValue());
+
 				if(null != previousInterestHistVO){
 					// 此处需要重新写计算规则
 					//synchronized (this) {
 					BigDecimal compareResult = interestHistVO.getSumOpenInterest().divide(previousInterestHistVO.getSumOpenInterest(),2,BigDecimal.ROUND_HALF_UP);
 					log.info("日志ID:{},计算合约持仓量-当前时间:{},标的:{},持仓量:{},计算结果:{}",logId,DateTime.of(interestHistVO.getTimestamp()),interestHistVO.getSymbol(),interestHistVO.getSumOpenInterest(),compareResult);
+
 					if(compareResult.compareTo(new BigDecimal(ADD_NUMBER)) >= 0){
 						log.info("日志ID:{},计算合约持仓量-当前时间:{},标的:{},价值增加",logId,interestHistVO.getSymbol(),DateTime.of(interestHistVO.getTimestamp()));
-						Boolean pushFlag = pushService.pushFeiShu(logId,interestHistVO.getSymbol(),
-								DateTime.of(interestHistVO.getTimestamp()).toString(),"", ExchangeEnum.EXCHANGE_BINANCE, PushEnum.FUTURES_OPEN_INTEREST_LONG);
-						if(pushFlag){
-							log.info("日志ID:{},计算合约持仓量-标的:{},推送消息成功",logId,interestHistVO.getSymbol());
-						}
+//						Boolean pushFlag = pushService.pushFeiShu(logId,interestHistVO.getSymbol(),
+//								DateTime.of(interestHistVO.getTimestamp()).toString(),"", ExchangeEnum.EXCHANGE_BINANCE, PushEnum.FUTURES_OPEN_INTEREST_LONG);
+//						if(pushFlag){
+//							log.info("日志ID:{},计算合约持仓量-标的:{},推送消息成功",logId,interestHistVO.getSymbol());
+//						}
+						stringBuffer.append("标的:").append(interestHistVO.getSymbol()).append("\n");
 					}
 					//}
 
 				}
 			}
+			stringBuffer.append("时间:").append(DateTime.now());
+			pushService.pushManySymbol(logId,stringBuffer.toString());
 		} catch (BinanceConnectorException e) {
 			log.error("fullErrMessage: {}", e.getMessage(), e);
 		} catch (BinanceClientException e) {

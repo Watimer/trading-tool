@@ -42,7 +42,7 @@ public class CoinMarketCapTask {
 	@Resource
 	SymbolInfoService symbolInfoService;
 
-	//@Scheduled(fixedRate = 60000)
+	@Scheduled(fixedRate = 60000)
 	public void queryVolumeTask(){
 		Long logId = IdWorker.getId();
 		List<String> symbolList = new ArrayList<>();
@@ -52,7 +52,7 @@ public class CoinMarketCapTask {
 		});
 		Random read = new Random();
 		for (String symbol : symbolList){
-			int i = read.nextInt(1) + 5;
+			int i = read.nextInt(1);
 			log.info("日志ID:{},标的:{},睡眠时间:{}",logId,symbol,i);
 			ThreadUtil.sleep(i, TimeUnit.SECONDS);
 			log.info("日志ID:{},标的:{},开始执行",logId,symbol);

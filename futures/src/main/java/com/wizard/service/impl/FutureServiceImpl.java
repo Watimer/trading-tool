@@ -14,6 +14,7 @@ import com.wizard.component.CheckComponent;
 import com.wizard.component.GlobalListComponent;
 import com.wizard.config.PrivateConfig;
 import com.wizard.model.vo.SymbolFundingRateVO;
+import com.wizard.model.vo.TradingViewStrongSymbolVO;
 import com.wizard.push.serivce.PushService;
 import com.wizard.service.FutureService;
 import lombok.extern.slf4j.Slf4j;
@@ -184,16 +185,14 @@ public class FutureServiceImpl implements FutureService {
 					.sorted(Comparator.comparing(SymbolFundingRateVO::getFundingRate))
 					.collect(Collectors.toList());
 			if(!tempList.isEmpty()){
+				StringBuffer stringBuffer = new StringBuffer();
+				stringBuffer.append("警报类型:资金费率").append("\n");
 				for (SymbolFundingRateVO symbolFundingRateVO:tempList) {
-					PushEnum pushEnum = PushEnum.FUTURES_SYMBOL_RATE;
 					BigDecimal rateResult = symbolFundingRateVO.getFundingRate().multiply(new BigDecimal("100"));
-					pushEnum.setDescription("资金费率:", String.format("%.4f%%",rateResult));
-					Boolean pushFlag = pushService.pushFeiShu(logId,symbolFundingRateVO.getSymbol(),
-							DateTime.of(symbolFundingRateVO.getFundingTime()).toString(),"", ExchangeEnum.EXCHANGE_BINANCE, PushEnum.FUTURES_SYMBOL_RATE);
-					if(pushFlag){
-						log.info("日志ID:{},标的:{},推送消息成功",logId,symbolFundingRateVO.getSymbol());
-					}
+					stringBuffer.append("标的:").append(symbolFundingRateVO.getSymbol()).append(",资金费率:").append(String.format("%.4f%%",rateResult)).append("\n");
 				}
+				stringBuffer.append("时间:").append(DateUtil.now());
+				pushService.pushManySymbol(logId,stringBuffer.toString());
 			}
 			log.info("{}",result);
 		} catch (BinanceConnectorException e) {

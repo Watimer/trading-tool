@@ -1,5 +1,7 @@
 package com.wizard.task;
 
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -8,8 +10,11 @@ import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
+import com.wizard.model.po.SymbolInfoPo;
 import com.wizard.model.po.VolumeInfoPo;
+import com.wizard.service.SymbolInfoService;
 import com.wizard.service.VolumeInfoService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
@@ -18,10 +23,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -37,10 +39,17 @@ public class CoinMarketCapTask {
 	@Resource
 	VolumeInfoService volumeInfoService;
 
+	@Resource
+	SymbolInfoService symbolInfoService;
+
 	@Scheduled(fixedRate = 60000)
 	public void queryVolumeTask(){
 		Long logId = IdWorker.getId();
-		List<String> symbolList = Arrays.asList("pepe","aptos","aave");
+		List<String> symbolList = new ArrayList<>();
+		List<SymbolInfoPo> symbolInfoPoList = symbolInfoService.listSymbolInfoPo(logId,new LambdaQueryWrapper<>(SymbolInfoPo.class).eq(SymbolInfoPo::getDelFlag,0));
+		symbolInfoPoList.stream().forEach(item ->{
+			symbolList.add(item.getSymbolName().toLowerCase(Locale.ROOT));
+		});
 		Random read = new Random();
 		for (String symbol : symbolList){
 			int i = read.nextInt(1) + 5;
@@ -55,11 +64,13 @@ public class CoinMarketCapTask {
 
 	public void getSymbolVolume(Long logId,String symbol) {
 
-		log.debug("日志ID:{},查询交易量-标的:{},开始。",logId,symbol);
+		log.info("日志ID:{},查询交易量-标的:{},开始。",logId,symbol);
 		String API_URL = "https://api.coinmarketcap.com/data-api/v3/cryptocurrency/market-pairs/latest?slug="+symbol+"&start=1&limit=10&category=spot&centerType=all&sort=cmc_rank_advanced&direction=desc&spotUntracked=true";
+		//String API_URL = "https://api.coinmarketcap.com/data-api/v3/cryptocurrency/market-pairs/latest?slug="+symbol+"&start=1&quoteCurrencyId=825&limit=10&category=spot&centerType=all&sort=cmc_rank_advanced&direction=desc&spotUntracked=true";
+
 		String result = HttpRequest
 				.get(API_URL)
-				.setHttpProxy("127.0.0.1",7897)
+				//.setHttpProxy("127.0.0.1",7897)
 				.execute().body();
 
 
@@ -97,11 +108,13 @@ public class CoinMarketCapTask {
 			volumeInfoPo.setEffectiveLiquidity(marketPairs.getInteger("effectiveLiquidity"));
 			volumeInfoPo.setExchangeProportion(marketPairs.getBigDecimal("volumePercent").setScale(2, BigDecimal.ROUND_CEILING));
 			volumeInfoPo.setMarketReputation(marketPairs.getInteger(("marketReputation")));
-			volumeInfoPo.setCreateTime(LocalDateTimeUtil.now());
+			volumeInfoPo.setQuoteSymbol(marketPairs.getString("quoteSymbol"));
+			volumeInfoPo.setCreateTime(DateTime.now());
 			volumeInfoPo.setDelFlag(0);
 			volumeInfoPo.setLevel("24h");
 			volumeInfoPoList.add(volumeInfoPo);
 		}
+		log.info("日志ID:{},查询交易量-标的:{},待添加信息:{}",logId,symbol, JSONObject.toJSONString(volumeInfoPoList));
 		volumeInfoService.saveBatch(logId, volumeInfoPoList);
 	}
 }

@@ -1,7 +1,6 @@
 package com.wizard.model.vo;
 
 import lombok.Data;
-import lombok.experimental.Builder;
 
 import java.io.Serializable;
 

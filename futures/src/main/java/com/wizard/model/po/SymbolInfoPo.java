@@ -1,49 +1,53 @@
 package com.wizard.model.po;
 
+import cn.hutool.core.date.DateTime;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import lombok.Builder;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Date;
 
 /**
  * @author 岳耀栎
- * @date 2024-09-18
- * @desc 交易量统计实体
+ * @date 2024-09-19
+ * @desc 标的信息
  */
 @Data
-@TableName(value = "volume_info")
-public class VolumeInfoPo implements Serializable {
+@Builder
+@TableName(value = "symbol_info")
+public class SymbolInfoPo implements Serializable {
 
 	@TableId(value = "id",type = IdType.NONE)
 	@JsonSerialize(using = ToStringSerializer.class)
 	private Long id;
 
-	private Long groupFlag;
-
+	/**
+	 * 标的简称
+	 */
 	private String symbol;
 
-	private BigDecimal currentPrice;
+	/**
+	 * 标的全称
+	 */
+	private String symbolName;
 
-	private String exchangeName;
+	/**
+	 * 板块标签
+	 */
+	private String tags;
 
-	private BigDecimal exchangeProportion;
+	/**
+	 * 操盘机构
+	 */
+	private String institution;
 
-	private BigDecimal exchangeVolume;
-
-	private String level;
-
-	private Integer effectiveLiquidity;
-
-	private Integer marketReputation;
-
-	private String quoteSymbol;
+	private String content;
 
 	private Date createTime;
 

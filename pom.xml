@@ -17,13 +17,14 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>1.2.7.RELEASE</version>
+        <version>2.3.4.RELEASE</version>
     </parent>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
-        <lombok.version>1.14.8</lombok.version>
+        <springboot.version>2.3.3.RELEASE</springboot.version>
+        <lombok.version>1.18.12</lombok.version>
         <fastjson.version>2.0.4</fastjson.version>
         <hutool.version>5.8.16</hutool.version>
         <mybatisplus.version>3.4.3</mybatisplus.version>
@@ -31,5 +32,6 @@
         <ta.version>0.4.0</ta.version>
         <quant.version>XLCQ20240604</quant.version>
         <web3j.version>5.0.0</web3j.version>
+        <druid-version>1.1.22</druid-version>
     </properties>
 </project>

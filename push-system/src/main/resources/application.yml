@@ -1,16 +1,15 @@
 
 # 飞书配置
 FEISHU:
-  FS_WEBHOOK_URL: https://open.feishu.cn/open-apis/bot/v2/hook/48e0a8c2-b69e-466f-a4ab-9928b8657568
+  FS_WEBHOOK_URL: https://open.feishu.cn/open-apis/bot/v2/hook/48e0a8c2-b69e-466f-a4ab-
 
 # 代理地址
 PROXY:
-  URL: https://trade1818.top/https/fapi.binance.com
-#  URL: https://fapi.binance.com
+  URL: https://fapi.binance.com
 
 # 持仓变动
 ADD_NUMBER: 1.2
 
 BINANCE:
-  API_KEY: 89wPwxLAkzIz2MsFNZtWMRM449QLDvP7ncWup9bpbWo9pO7YhVxIc0m8stDHDtDC
-  SECRET_KEY: 11NjXeXSV3onWKtKmwpG3HTRwp9v86jg54zruGYhX4nJc0n7vLfmYxHAc2S6jVrt
+  API_KEY: 
+  SECRET_KEY: 

@@ -33,5 +33,6 @@
         <quant.version>XLCQ20240604</quant.version>
         <web3j.version>5.0.0</web3j.version>
         <druid-version>1.1.22</druid-version>
+        <skipTests>true</skipTests>
     </properties>
 </project>

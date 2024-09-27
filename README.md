@@ -2,6 +2,16 @@
 一个用于辅助交易小工具
 
 ## 如何使用
+### 设置项目
+在IDEA中打开Project Structure,然后将项目的jdk环境设置为1.8，如图所示。
+
+![img_2.png](img_2.png)
+
+![img_3.png](img_3.png)
+
+![img_4.png](img_4.png)
+正常来说，install 为success时,项目可正常启动
+![img_5.png](img_5.png)
 ### 创建飞书群里并添加机器人
 首先创建飞书群聊，并添加群聊机器人。如果没有固定IP地址,可以在安全设置中，只添加自定义关键词，建议添加【标的】。另外Webhook地址需要配置到对应配置文件中，如图所示
 ![img.png](img.png)

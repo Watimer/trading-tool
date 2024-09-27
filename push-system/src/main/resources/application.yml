@@ -1,7 +1,7 @@
 
 # 飞书配置
 FEISHU:
-  FS_WEBHOOK_URL: https://open.feishu.cn/open-apis/bot/v2/hook/48e0a8c2-b69e-466f-a4ab-9928b8657568
+  FS_WEBHOOK_URL: https://open.feishu.cn/open-apis/bot/v2/hook/48e0a8c2-b69e-466f-a4ab-
 
 # 代理地址
 PROXY:
@@ -12,6 +12,6 @@ PROXY:
 ADD_NUMBER: 1.2
 
 BINANCE:
-  API_KEY: mMojOWArr8rnF8SsOfxuij7PFwbaATKH4xxd3WeTOu7XmxZJSVwyfRE1K8j4g34Z
-  SECRET_KEY: GSDHWgEHocyHhbe5YxlHftZ2ea4s5y9oTgcsDFRKDAnjbc5NUj5ZDFBkyvhbx6ce
+  API_KEY:
+  SECRET_KEY:
 

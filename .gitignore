@@ -35,6 +35,7 @@ build/
 **/logs/
 .logs/
 .log
+*.yml
 ### VS Code ###
 .vscode/
 

@@ -29,7 +29,7 @@ public class StartComponent {
 	 * 项目启动时执行
 	 * 用于将可交易标的放入内存中,方便后续直接调用或者计算是否有增减标的内容
 	 */
-	@PostConstruct
+//	@PostConstruct
 	public void initGlobalList(){
 		Long logId = IdWorker.getId();
 		log.info("日志ID:{},启动时执行1",logId);

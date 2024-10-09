@@ -42,7 +42,7 @@ public class CoinMarketCapTask {
 	@Resource
 	SymbolInfoService symbolInfoService;
 
-	@Scheduled(fixedRate = 60000)
+//	@Scheduled(fixedRate = 60000)
 	public void queryVolumeTask(){
 		Long logId = IdWorker.getId();
 		List<String> symbolList = new ArrayList<>();

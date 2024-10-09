@@ -32,7 +32,7 @@ public class BinanceTask {
 	 * 计算币安合约持仓量
 	 * 从零时开始,每五分钟执行一次
 	 */
-	@Scheduled(cron = "* 0/5 0/1 * * ? ")
+//	@Scheduled(cron = "* 0/5 0/1 * * ? ")
 	public void openInterestStatistics(){
 		Long logId = IdWorker.getId();
 		log.info("日志ID:{},开始检测合约持仓量是否存在异动",logId);
@@ -44,7 +44,7 @@ public class BinanceTask {
 	 * 监控是否存在新增标的
 	 * 每分钟执行一次
 	 */
-	@Scheduled(fixedRate = 20000)
+//	@Scheduled(fixedRate = 20000)
 	public void checkNewSymbol(){
 		Long logId = IdWorker.getId();
 		log.info("日志ID:{},开始检测是否存在新增标的",logId);
@@ -58,7 +58,7 @@ public class BinanceTask {
 	 * 并推送负费率数据
 	 */
 	@Async
-	@Scheduled(fixedRate = 4 * 60 * 60 * 1000)
+//	@Scheduled(fixedRate = 4 * 60 * 60 * 1000)
 	public void getRate(){
 		Long logId = IdWorker.getId();
 		log.info("日志ID:{},开始检测当前资金费率",logId);

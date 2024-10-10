@@ -5,6 +5,7 @@ import xlc.quant.data.indicator.IndicatorCalculateCarrier;
 import xlc.quant.data.indicator.calculator.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * 行情数据，股市请使用复权数据
@@ -99,6 +100,9 @@ public class MarketQuotation implements IndicatorCalculateCarrier<LocalDateTime>
 	/** MA_60 */
 	private Double ma60;
 
+	/** MA_120 */
+	private Double ma120;
+
 	// 股价-EMA：指数移动平均值
 	/** EMA_5 */
 	private Double ema5;
@@ -111,6 +115,8 @@ public class MarketQuotation implements IndicatorCalculateCarrier<LocalDateTime>
 
 	/** EMA_60 */
 	private Double ema60;
+	private Double ema144;
+	private Double ema169;
 
 	// 股价-RSI：相对强弱指标RSI是用以计测市场供需关系和买卖力道的方法及指标。
 	/** RSI-6 */

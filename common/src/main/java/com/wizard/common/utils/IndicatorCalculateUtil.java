@@ -1,5 +1,6 @@
 package com.wizard.common.utils;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.wizard.common.model.*;
@@ -34,11 +35,7 @@ public class IndicatorCalculateUtil {
 	 * @param dmi					DMI指标,传入则以此参数计算
 	 * @param td					TD九转序列指标,传入则以此参数计算
 	 * @param cci					CCI指标,传入则以此参数计算
-	 * @param ma					简单平均线指标,传入则以此参数计算
-	 * @param ema					移动平均线指标,传入则以此参数计算
-	 * @param rsi					RSI指标,传入则以此参数计算
-	 * @param bias					BIAS指标,传入则以此参数计算
-	 * @param wr					WR指标,传入则以此参数计算
+	 * @param biasParamsList		BIAS指标,传入则以此参数计算
 	 */
 	public static void individuationIndicatorCalculate(List<MarketQuotation> marketQuotationList,
 													   int indicatorSetScale,
@@ -47,12 +44,8 @@ public class IndicatorCalculateUtil {
 													   BollParams boll,
 													   DmiParams dmi,
 													   TdParams td,
-													   CCI cci,
-													   MA ma,
-													   EMA ema,
-													   RSI rsi,
-													   BiasParams bias,
-													   WrParams wr){
+													   CciParams cci,
+													   List<BiasParams> biasParamsList){
 		if(ObjectUtil.isNull(indicatorSetScale)){
 			indicatorSetScale = 2;
 		}
@@ -75,6 +68,25 @@ public class IndicatorCalculateUtil {
 		if(ObjectUtil.isNull(td)){
 			// TD九转序列-计算器
 			indicatorCalculatorList.add(TD.buildCalculator(td.getCapacity(), td.getMoveSize(),MarketQuotation::setTd,MarketQuotation::getTd));
+		}
+
+		if(ObjectUtil.isNull(cci)){
+			// CCI-计算器: 顺势指标
+			indicatorCalculatorList.add(CCI.buildCalculator(cci.getCapacity(),cci.getIndicatorSetScale(),MarketQuotation::setCci14,MarketQuotation::getCci14));
+		}
+
+		if(CollUtil.isNotEmpty(biasParamsList)){
+			for (int i=0;i<biasParamsList.size();i++){
+				if(i == 0){
+					indicatorCalculatorList.add(BIAS.buildCalculator(biasParamsList.get(i).getCapacity(),MarketQuotation::setBias6));
+				}
+				if(i == 1){
+					indicatorCalculatorList.add(BIAS.buildCalculator(biasParamsList.get(i).getCapacity(),MarketQuotation::setBias12));
+				}
+				if(i == 2){
+					indicatorCalculatorList.add(BIAS.buildCalculator(biasParamsList.get(i).getCapacity(),MarketQuotation::setBias24));
+				}
+			}
 		}
 		List<IndicatorCalculator<MarketQuotation, ?>> calculatorConfig = indicatorCalculatorList;
 		int maximum =400;//管理指标载体的最大数量
@@ -146,12 +158,15 @@ public class IndicatorCalculateUtil {
 		indicatorCalculatorList.add(MA.buildCalculator(20,indicatorSetScale,MarketQuotation::setMa20));
 		indicatorCalculatorList.add(MA.buildCalculator(40,indicatorSetScale,MarketQuotation::setMa40));
 		indicatorCalculatorList.add(MA.buildCalculator(60,indicatorSetScale,MarketQuotation::setMa60));
+		indicatorCalculatorList.add(MA.buildCalculator(120,indicatorSetScale,MarketQuotation::setMa120));
 
 		//EMA-计算器: 指数平滑移动平均线，简称指数平均线。
 		indicatorCalculatorList.add(EMA.buildCalculator(5,indicatorSetScale,MarketQuotation::setEma5,MarketQuotation::getEma10));
 		indicatorCalculatorList.add(EMA.buildCalculator(10,indicatorSetScale,MarketQuotation::setEma10,MarketQuotation::getEma10));
 		indicatorCalculatorList.add(EMA.buildCalculator(20,indicatorSetScale,MarketQuotation::setEma20,MarketQuotation::getEma20));
 		indicatorCalculatorList.add(EMA.buildCalculator(60,indicatorSetScale,MarketQuotation::setEma60,MarketQuotation::getEma60));
+		indicatorCalculatorList.add(EMA.buildCalculator(144,indicatorSetScale,MarketQuotation::setEma144,MarketQuotation::getEma144));
+		indicatorCalculatorList.add(EMA.buildCalculator(169,indicatorSetScale,MarketQuotation::setEma169,MarketQuotation::getEma169));
 
 		//RSI-计算器: 相对强弱指标
 		indicatorCalculatorList.add(RSI.buildCalculator(6,MarketQuotation::setRsi6,MarketQuotation::getRsi6));

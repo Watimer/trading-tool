@@ -263,7 +263,7 @@ public class FutureServiceImpl implements FutureService {
 		BollParams bollParams = BollParams.builder().d(2).build();
 		bollParams.setCapacity(400);
 		IndicatorCalculateUtil.individuationIndicatorCalculate(marketQuotationList,
-				2,kdjParams, macdParams, bollParams,null,null,null,null,null,null,null,null);
+				2,kdjParams, macdParams, bollParams,null,null,null,null);
 		log.info("计算自定义指标，结束");
 		return marketQuotationList;
 	}

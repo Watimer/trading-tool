@@ -14,7 +14,7 @@ import java.io.Serializable;
 @Builder
 public class CciParams extends IndicatorParams implements Serializable {
 
-	private int moveSize = 4;
+	private int indicatorSetScale = 4;
 
 	private int capacity = 9;
 }

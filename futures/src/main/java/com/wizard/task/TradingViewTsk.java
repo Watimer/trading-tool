@@ -26,7 +26,7 @@ public class TradingViewTsk {
 	 * 调用tv数据，检测强势标的。从0时起，每1小时零2秒执行一次
 	 */
 	//@Scheduled(cron = "2 0 0/1 * * ?")
-	@Scheduled(fixedRate = 5000L)
+	//@Scheduled(fixedRate = 5000L)
 	public void scan(){
 		Long logId = IdWorker.getId();
 		log.info("日志ID:{},开始检测强势标的",logId);

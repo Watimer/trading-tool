@@ -8,6 +8,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.tictactec.ta.lib.Core;
 import com.tictactec.ta.lib.MInteger;
 import com.tictactec.ta.lib.RetCode;
+import com.wizard.common.model.MarketQuotation;
+import com.wizard.common.utils.DataTransformationUtil;
 import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,16 +29,10 @@ public class TestIn {
 
     public static void main(String[] args) {
         String source = FileUtil.readUtf8String("/Users/yueyaoli/wizard/trading-tool/futures/src/test/java/com/wizard/line.txt");
-        JSONArray jsonArray = JSONArray.parseArray(source);
         //行情数据
-        List<MarketQuotation> listMarketQuotation = new ArrayList<>();
-        jsonArray.stream().forEach(item ->{
-            JSONArray jsonItem = JSONArray.parseArray(item.toString());
-            MarketQuotation marketQuotation = getMarketQuotation(jsonItem);
-            listMarketQuotation.add(marketQuotation);
-        });
+        List<MarketQuotation> listMarketQuotation = DataTransformationUtil.transform("BTCUSD",source);
         //行情按照收盘时间正序排序。
-        List<MarketQuotation> listMarketQuotationOrderByCloseTimeAsc= listMarketQuotation .stream().sorted(Comparator.comparing(MarketQuotation::getCloseTime)).collect(Collectors.toList());
+        List<MarketQuotation> listMarketQuotationOrderByCloseTimeAsc= listMarketQuotation.stream().sorted(Comparator.comparing(MarketQuotation::getCloseTime)).collect(Collectors.toList());
         singleIndicatorCalculate(listMarketQuotationOrderByCloseTimeAsc);
 
         multipleIndicatorCalculate(listMarketQuotationOrderByCloseTimeAsc,1);
@@ -76,31 +72,6 @@ public class TestIn {
         int macdLockBack = core.macdLookback(12,26,9);
         System.out.println(macdLockBack1);
         System.out.println(macdLockBack);
-    }
-
-    private static MarketQuotation getMarketQuotation(JSONArray jsonItem){
-        MarketQuotation marketQuotation = new MarketQuotation();
-        Long openTime = jsonItem.getLong(0);
-        Long closeTime = jsonItem.getLong(6);
-
-        marketQuotation.setCloseTime(LocalDateTimeUtil.of(DateUtil.date(closeTime)));
-        marketQuotation.setTimestamp(LocalDateTimeUtil.of(DateUtil.date(openTime)));
-
-        Double openPrice = jsonItem.getDouble(1);
-        marketQuotation.setOpen(openPrice);
-        Double highPrice = jsonItem.getDouble(2);
-        marketQuotation.setHigh(highPrice);
-        Double lowPrice = jsonItem.getDouble(3);
-        marketQuotation.setLow(lowPrice);
-        Double closePrice = jsonItem.getDouble(4);
-        marketQuotation.setClose(closePrice);
-        Double volume = jsonItem.getDouble(5);
-        marketQuotation.setVolume(volume);
-        Double amount = jsonItem.getDouble(7);
-        marketQuotation.setAmount(amount);
-//        marketQuotation.setKdj(new KDJ(3d,3d));
-        marketQuotation.setSymbol("BTCUSD");
-        return marketQuotation;
     }
 
     /**
@@ -146,7 +117,6 @@ public class TestIn {
                 System.out.println(td+",,,"+dataList.indexOf(item));
             }
         });
-
     }
 
     /**
@@ -161,7 +131,7 @@ public class TestIn {
         // MACD-计算器
         indicatorCalculatorList.add(MACD.buildCalculator(12, 26, 9,indicatorSetScale,MarketQuotation::setMacd,MarketQuotation::getMacd));
         // BOLL-计算器
-        indicatorCalculatorList.add(BOLL.buildCalculator(400, 2,indicatorSetScale,MarketQuotation::setBoll,MarketQuotation::getBoll));
+        indicatorCalculatorList.add(BOLL.buildCalculator(20, 2,indicatorSetScale,MarketQuotation::setBoll,MarketQuotation::getBoll));
         // DMI-计算
         indicatorCalculatorList.add(DMI.buildCalculator(14, 6,MarketQuotation::setDmi,MarketQuotation::getDmi));
 

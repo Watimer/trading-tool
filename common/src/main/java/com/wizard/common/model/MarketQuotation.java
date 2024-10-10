@@ -1,15 +1,10 @@
-package com.wizard;
-
-import java.time.LocalDateTime;
+package com.wizard.common.model;
 
 import lombok.Data;
 import xlc.quant.data.indicator.IndicatorCalculateCarrier;
-import xlc.quant.data.indicator.calculator.BOLL;
-import xlc.quant.data.indicator.calculator.CCI;
-import xlc.quant.data.indicator.calculator.DMI;
-import xlc.quant.data.indicator.calculator.KDJ;
-import xlc.quant.data.indicator.calculator.MACD;
-import xlc.quant.data.indicator.calculator.RSI;
+import xlc.quant.data.indicator.calculator.*;
+
+import java.time.LocalDateTime;
 
 /**
  * 行情数据，股市请使用复权数据
@@ -26,7 +21,7 @@ public class MarketQuotation implements IndicatorCalculateCarrier<LocalDateTime>
 
 	/** 交易代码 */
 	private String symbol;
-	
+
 	/** 开盘价 */
 	private Double open;
 
@@ -65,7 +60,7 @@ public class MarketQuotation implements IndicatorCalculateCarrier<LocalDateTime>
 	// =======================XXX 以上是指标计算依赖属性字段
 
 	// 技术指标-多属性值指标 XXX
-	
+
 	/** KDJ随机指标 */
 	private KDJ kdj;
 
@@ -86,8 +81,8 @@ public class MarketQuotation implements IndicatorCalculateCarrier<LocalDateTime>
 	// 股价-CCI：顺势指标 CCI指标就一个参数，一般用14，看中短线用，还可以用84看中长线。
 	/** CCI14 */
 	private CCI cci14;
-	
-	
+
+
 	// 股价-MA：移动平均线
 	/** MA_5 */
 	private Double ma5;

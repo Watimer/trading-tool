@@ -2,17 +2,25 @@ package com.wizard.service.impl;
 
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpRequest;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.binance.connector.futures.client.exceptions.BinanceClientException;
 import com.binance.connector.futures.client.exceptions.BinanceConnectorException;
 import com.binance.connector.futures.client.impl.UMFuturesClientImpl;
+import com.wizard.common.enums.ContractTypeEnum;
 import com.wizard.common.enums.ExchangeEnum;
+import com.wizard.common.enums.IntervalEnum;
 import com.wizard.common.enums.PushEnum;
+import com.wizard.common.model.MarketQuotation;
+import com.wizard.common.utils.DataTransformationUtil;
+import com.wizard.common.utils.IndicatorCalculateUtil;
 import com.wizard.component.CheckComponent;
 import com.wizard.component.GlobalListComponent;
 import com.wizard.config.PrivateConfig;
+import com.wizard.model.dto.SymbolLineDTO;
 import com.wizard.model.vo.SymbolFundingRateVO;
 import com.wizard.model.vo.TradingViewStrongSymbolVO;
 import com.wizard.push.serivce.PushService;
@@ -207,21 +215,44 @@ public class FutureServiceImpl implements FutureService {
 	/**
 	 * 获取连续合约数据
 	 *
-	 * @param symbol 标的
+	 * @param symbolLineDTO 标的
 	 * @return
 	 */
 	@Override
-	public String getContinuousKLines(String symbol) {
-		String url = "/dapi/v1/continuousKlines";
-	    String targetUrl = PrivateConfig.CM_BASE_URL + url;
-		String params = "?pair="+symbol+"&contractType=PERPETUAL&interval=15m";
+	public List<MarketQuotation> getContinuousKLines(SymbolLineDTO symbolLineDTO) {
+		String url = "/fapi/v1/continuousKlines";
+	    String targetUrl = PrivateConfig.UM_BASE_URL + url;
+		StringBuffer params = new StringBuffer();
+		params.append("?pair=").append(symbolLineDTO.getSymbol());
+		if(ObjectUtil.isNull(symbolLineDTO.getContractType())){
+			symbolLineDTO.setContractType(ContractTypeEnum.PERPETUAL);
+		}
+		if(ObjectUtil.isNull(symbolLineDTO.getInterval())){
+			symbolLineDTO.setInterval(IntervalEnum.FOUR_HOUR);
+		}
+		if(ObjectUtil.isNull(symbolLineDTO.getLimit())){
+			symbolLineDTO.setLimit(1000);
+		}
+		// 合约类型
+		params.append("&contractType=").append(symbolLineDTO.getContractType().getCode());
+		// 时间级别
+		params.append("&interval=").append(symbolLineDTO.getInterval().getCode());
+		// 限制数量
+		params.append("&limit=").append(symbolLineDTO.getLimit());
 		String resultUrl = targetUrl+params;
 		log.info("开始请求,目标地址:{}",resultUrl);
 
 		String result = HttpRequest.get(resultUrl).execute().body();
-		log.info("结果:{}",result);
-
-//		MarketQuotation marketQuotation = new MarketQuotation();
-		return result;
+		//log.info("原始结果:{}",result);
+		List<MarketQuotation> marketQuotationList = DataTransformationUtil.transform(symbolLineDTO.getSymbol(), result);
+		// 数据按照收盘时间排序
+		marketQuotationList = marketQuotationList.stream().sorted(Comparator.comparing(MarketQuotation::getCloseTime)).collect(Collectors.toList());
+		log.info("计算全部指标，开始");
+		// 计算指标
+		IndicatorCalculateUtil.multipleIndicatorCalculate(marketQuotationList,2);
+		log.info("计算全部指标，结束");
+		IndicatorCalculateUtil.singleIndicatorCalculate(marketQuotationList,2);
+		log.info("计算单个指标，结束");
+		return marketQuotationList;
 	}
 }

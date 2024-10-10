@@ -1,5 +1,8 @@
 package com.wizard.service;
 
+import com.wizard.common.model.MarketQuotation;
+import com.wizard.model.dto.SymbolLineDTO;
+
 import java.util.List;
 
 /**
@@ -32,8 +35,8 @@ public interface FutureService {
 
 	/**
 	 * 获取连续合约数据
-	 * @param symbol 标的
+	 * @param symbolLineDTO 标的
 	 * @return
 	 */
-	String getContinuousKLines(String symbol);
+	List<MarketQuotation> getContinuousKLines(SymbolLineDTO symbolLineDTO);
 }

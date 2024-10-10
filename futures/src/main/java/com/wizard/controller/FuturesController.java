@@ -1,5 +1,7 @@
 package com.wizard.controller;
 
+import com.wizard.common.model.MarketQuotation;
+import com.wizard.model.dto.SymbolLineDTO;
 import com.wizard.service.FutureService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -7,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * @author wizard
@@ -24,8 +27,8 @@ public class FuturesController {
 
 
 	@RequestMapping(value = "/getContinuousKLines",method = RequestMethod.GET)
-	public String getContinuousKLines(String symbol){
+	public List<MarketQuotation> getContinuousKLines(SymbolLineDTO symbolLineDTO){
 
-		return futureService.getContinuousKLines(symbol);
+		return futureService.getContinuousKLines(symbolLineDTO);
 	}
 }

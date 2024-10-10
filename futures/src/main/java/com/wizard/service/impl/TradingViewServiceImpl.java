@@ -13,11 +13,13 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
- * @author 岳耀栎
+ * @author wizard
  * @date 2024-06-03
  * @desc
  */
@@ -51,25 +53,70 @@ public class TradingViewServiceImpl implements TradingViewService {
 		// 解析返回结果
 		JSONObject jsonResult = JSONObject.parseObject(result);
 		List<JSONObject> dataList = jsonResult.getJSONArray("data").toJavaList(JSONObject.class);
-		Integer level = 1;
+		//Integer level = 1;
 		for (JSONObject jsonObject : dataList) {
 		    JSONArray jsonArray = jsonObject.getJSONArray("d");
 			String symbol = jsonArray.getString(0);
 			TradingViewStrongSymbolVO  tradingViewStrongSymbolVO = new TradingViewStrongSymbolVO();
 			tradingViewStrongSymbolVO.setSymbol(symbol);
-			tradingViewStrongSymbolVO.setLevel(level);
-			level++;
+			tradingViewStrongSymbolVO.setLevel(jsonArray.getInteger(7));
+			// 24h涨跌
+			tradingViewStrongSymbolVO.setIncreaseInPrice(jsonArray.getBigDecimal(14));
+			tradingViewStrongSymbolVO.setEffectiveLiquidity(jsonArray.getBigDecimal(15));
+			tradingViewStrongSymbolVO.setVolatility(jsonArray.getBigDecimal(21));
 			stringList.add(tradingViewStrongSymbolVO);
 		}
 		if(!stringList.isEmpty()){
 			StringBuffer stringBuffer = new StringBuffer();
-			stringBuffer.append("警报类型:推送强势标的").append("\n");
+			stringBuffer.append("警报类型:强势标的").append("\n").append("\n");
 			// 推送飞书
 			for (TradingViewStrongSymbolVO tradingViewStrongSymbolVO : stringList){
-				stringBuffer.append("标的:").append(tradingViewStrongSymbolVO.getSymbol()).append(",优先级:").append(tradingViewStrongSymbolVO.getLevel()).append("\n");
+
+				String symbol = tradingViewStrongSymbolVO.getSymbol();
+				if(symbol.length() < 8){
+					int count = symbol.length();
+					for (int i = count;i<8;i++)
+						symbol = symbol+"#";
+				}
+
+				BigDecimal icp = tradingViewStrongSymbolVO.getIncreaseInPrice();
+				icp = icp.setScale(2, BigDecimal.ROUND_CEILING);
+				String icpStringTemp = icp.toString();
+				int countLent= icpStringTemp.length();
+				for (int i = countLent;i<6;i++){
+					icpStringTemp = " "+icpStringTemp;
+				}
+				BigDecimal effectiveLiquidity = tradingViewStrongSymbolVO.getEffectiveLiquidity();
+				effectiveLiquidity = effectiveLiquidity.setScale(2, BigDecimal.ROUND_CEILING);
+				String effectiveLiquidityStringTemp = effectiveLiquidity.toString();
+				int effectiveLength = effectiveLiquidityStringTemp.length();
+				for (int i = effectiveLength;i<4;i++){
+					effectiveLiquidityStringTemp = " "+effectiveLiquidityStringTemp;
+				}
+				//effectiveLiquidity = new BigDecimal(effectiveLiquidityStringTemp);
+				BigDecimal volatility = tradingViewStrongSymbolVO.getVolatility();
+				volatility = volatility.setScale(2, BigDecimal.ROUND_CEILING);
+
+				String volatilityStringTemp = volatility.toString();
+				int volatilityLength = volatilityStringTemp.length();
+				for (int i = volatilityLength;i<5;i++){
+					volatilityStringTemp = " "+volatilityStringTemp;
+				}
+				stringBuffer.append("标的:").append(symbol).append(" ")
+						.append("V/M:").append(effectiveLiquidityStringTemp).append("%").append(" ").append(" ")
+						.append("24H:").append(icpStringTemp).append("%").append(" ").append(" ")
+						.append("波动:").append(volatilityStringTemp).append("%").append(" ").append(" ")
+						.append("评级:").append(tradingViewStrongSymbolVO.getLevel()).append("\n");
 			}
+			stringBuffer.append("\n");
 			stringBuffer.append("时间:").append(DateUtil.now());
 			pushService.pushManySymbol(logId,stringBuffer.toString());
 		}
+	}
+
+	public static void main(String[] args) {
+		String symbol = "BIGTIME";
+		symbol = String.format("%-9s", symbol);
+		System.out.println(symbol);
 	}
 }

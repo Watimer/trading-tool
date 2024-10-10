@@ -27,7 +27,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author 岳耀栎
+ * @author wizard
  * @date 2024-09-18
  * @desc
  */
@@ -42,7 +42,7 @@ public class CoinMarketCapTask {
 	@Resource
 	SymbolInfoService symbolInfoService;
 
-//	@Scheduled(fixedRate = 60000)
+	//@Scheduled(fixedRate = 60000)
 	public void queryVolumeTask(){
 		Long logId = IdWorker.getId();
 		List<String> symbolList = new ArrayList<>();
@@ -110,7 +110,7 @@ public class CoinMarketCapTask {
 			volumeInfoPo.setSymbol(marketPairs.getString("baseSymbol"));
 			volumeInfoPo.setCurrentPrice(marketPairs.getBigDecimal("price").setScale(2, BigDecimal.ROUND_CEILING));
 			volumeInfoPo.setExchangeName(marketPairs.getString("exchangeName"));
-			volumeInfoPo.setExchangeVolume(marketPairs.getBigDecimal("volumeQuote").setScale(2, BigDecimal.ROUND_CEILING));
+			volumeInfoPo.setExchangeVolume(marketPairs.getBigDecimal("volumeUsd").setScale(2, BigDecimal.ROUND_CEILING));
 			volumeInfoPo.setEffectiveLiquidity(marketPairs.getInteger("effectiveLiquidity"));
 			volumeInfoPo.setExchangeProportion(marketPairs.getBigDecimal("volumePercent").setScale(2, BigDecimal.ROUND_CEILING));
 			volumeInfoPo.setMarketReputation(marketPairs.getInteger(("marketReputation")));

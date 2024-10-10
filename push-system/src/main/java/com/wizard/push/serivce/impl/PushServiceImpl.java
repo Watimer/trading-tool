@@ -87,4 +87,29 @@ public class PushServiceImpl implements PushService {
 		}
 		return resultFlag;
 	}
+
+	@Override
+	public Boolean pushImage(Long logId, String imageKey) {
+		Boolean resultFlag = Boolean.FALSE;
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("msg_type","image");
+		JSONObject jsonContent = new JSONObject();
+		jsonContent.put("image_key",imageKey);
+		jsonObject.put("content",jsonContent);
+		// 调用飞书机器人接口
+		String feiShuResult = HttpRequest.post(FS_WEBHOOK_URL)
+				.header("Content-Type", "application/json")
+				.body(jsonObject.toString())
+				.execute()
+				.body();
+		JSONObject jsonFeiShu = JSONObject.parseObject(feiShuResult);
+		log.info("日志ID:{},本机IP:{},飞书机器人返回信息:{}",logId, NetUtil.localIpv4s().toString(),feiShuResult);
+		if(0==jsonFeiShu.getInteger("StatusCode")){
+			log.info("日志ID:{},消息发送成功",logId);
+			resultFlag = Boolean.TRUE;
+		} else {
+			log.error("日志ID:{},消息发送失败",logId);
+		}
+		return resultFlag;
+	}
 }

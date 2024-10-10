@@ -65,6 +65,7 @@ public class FutureServiceImpl implements FutureService {
 		List<String> symbolList = getExchangeInfo(logId);
 		List<String> alreadyList = globalListComponent.getGlobalList();
 		boolean isEqual = symbolList.stream().allMatch(alreadyList::contains);
+		log.info("日志ID:{},检测是否存在新增标的-当前已存在标的:{}",logId,JSONObject.toJSONString(alreadyList));
 		if(!isEqual){
 			// 最新可交易列表中存在的标的
 			List<String> newSymbolList = symbolList.stream()

@@ -3,9 +3,10 @@ package com.wizard.model.vo;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 /**
- * @author 岳耀栎
+ * @author wizard
  * @date 2024-09-18
  * @desc
  */
@@ -26,4 +27,21 @@ public class TradingViewStrongSymbolVO implements Serializable {
 	 * 描述
 	 */
 	private String direction;
+
+	/**
+	 * 流动性分数 = 交易量/市值
+	 */
+	private BigDecimal effectiveLiquidity;
+
+	/**
+	 * 波动率
+	 */
+	private BigDecimal volatility;
+
+	/**
+	 * 涨幅
+	 */
+	private BigDecimal increaseInPrice;
+
+
 }

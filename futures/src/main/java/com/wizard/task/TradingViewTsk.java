@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import javax.annotation.Resource;
 
 /**
- * @author 岳耀栎
+ * @author wizard
  * @date 2024-06-03
  * @desc
  */
@@ -22,7 +22,11 @@ public class TradingViewTsk {
 	@Resource
 	TradingViewService tradingViewService;
 
-//	@Scheduled(fixedRate = 60 * 60 * 1000)
+	/**
+	 * 调用tv数据，检测强势标的。从0时起，每1小时零2秒执行一次
+	 */
+	//@Scheduled(cron = "2 0 0/1 * * ?")
+	@Scheduled(fixedRate = 5000L)
 	public void scan(){
 		Long logId = IdWorker.getId();
 		log.info("日志ID:{},开始检测强势标的",logId);

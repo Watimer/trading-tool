@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title th:text="${title}"></title>
+</head>
+<body>
+<h3>
+    <p class="email-subject">
+        <sapn th:text="${subject}"/>
+    </p>
+</h3>
+
+<div>
+    <p><span>发件人: </span><span th:text="${from}"/></p>
+    <p><span>收件人: </span><span th:text="${to}"/></p>
+    <p><span>发送时间: </span><span th:text="${date}"/></p>
+</div>
+
+
+<hr>
+<div style="font-size: 12px">
+    <p th:utext="${content}"></p>
+</div>
+</body>
+</html>

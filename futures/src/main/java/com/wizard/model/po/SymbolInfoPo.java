@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 import java.util.Date;
 
 /**
- * @author 岳耀栎
+ * @author wizard
  * @date 2024-09-19
  * @desc 标的信息
  */

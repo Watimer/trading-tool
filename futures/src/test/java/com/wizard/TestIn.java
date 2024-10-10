@@ -121,7 +121,7 @@ public class TestIn {
         IndicatorCalculator<MarketQuotation,BOLL> bollCalculator =BOLL.buildCalculator(400,2d,2,MarketQuotation::setBoll,MarketQuotation::getBoll);
         listMarketQuotationOrderByCloseTimeAsc.stream().forEach(item ->{
             BOLL boll = bollCalculator.input(item);
-//            System.out.println(boll);
+            System.out.println(boll);
         });
     }
 
@@ -131,7 +131,7 @@ public class TestIn {
      */
     public static void multipleIndicatorCalculate(List<MarketQuotation> listMarketQuotationOrderByCloseTimeAsc,int indicatorSetScale) {
         List<IndicatorCalculator<MarketQuotation, ?>> calculatorConfig = buildIndicatorCalculatorList(2);
-        int maximum =200;//管理指标载体的最大数量
+        int maximum =400;//管理指标载体的最大数量
         IndicatorWarehouseManager<LocalDateTime,MarketQuotation> calculateManager = new IndicatorWarehouseManager<>(maximum, calculatorConfig);
 
         //循环-管理员接收 新行情数据-进行批量计算所有指标
@@ -161,7 +161,7 @@ public class TestIn {
         // MACD-计算器
         indicatorCalculatorList.add(MACD.buildCalculator(12, 26, 9,indicatorSetScale,MarketQuotation::setMacd,MarketQuotation::getMacd));
         // BOLL-计算器
-        indicatorCalculatorList.add(BOLL.buildCalculator(20, 2,indicatorSetScale,MarketQuotation::setBoll,MarketQuotation::getBoll));
+        indicatorCalculatorList.add(BOLL.buildCalculator(400, 2,indicatorSetScale,MarketQuotation::setBoll,MarketQuotation::getBoll));
         // DMI-计算
         indicatorCalculatorList.add(DMI.buildCalculator(14, 6,MarketQuotation::setDmi,MarketQuotation::getDmi));
 

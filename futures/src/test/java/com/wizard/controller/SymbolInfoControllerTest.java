@@ -30,7 +30,7 @@ import java.util.List;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
- * @author 岳耀栎
+ * @author wizard
  * @date 2024-09-19
  * @desc
  */

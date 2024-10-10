@@ -1,7 +1,8 @@
 package com.wizard.common.utils;
 
+import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ObjectUtil;
-import com.wizard.common.model.MarketQuotation;
+import com.wizard.common.model.*;
 import xlc.quant.data.indicator.IndicatorCalculator;
 import xlc.quant.data.indicator.IndicatorWarehouseManager;
 import xlc.quant.data.indicator.calculator.*;
@@ -17,17 +18,83 @@ import java.util.List;
  */
 public class IndicatorCalculateUtil {
 
+	public static int getIntByDouble(Double d){
+		return NumberUtil.parseInt(d.toString());
+	}
+
 	// TODO 自定义指标参数
 
 	/**
+	 *
+	 * @param marketQuotationList	行情数据
+	 * @param indicatorSetScale		量价指标保留的小数点位数
+	 * @param kdj					KDJ指标,传入则以此参数计算
+	 * @param macd					MACD指标,传入则以此参数计算
+	 * @param boll					布林带指标,传入则以此参数计算
+	 * @param dmi					DMI指标,传入则以此参数计算
+	 * @param td					TD九转序列指标,传入则以此参数计算
+	 * @param cci					CCI指标,传入则以此参数计算
+	 * @param ma					简单平均线指标,传入则以此参数计算
+	 * @param ema					移动平均线指标,传入则以此参数计算
+	 * @param rsi					RSI指标,传入则以此参数计算
+	 * @param bias					BIAS指标,传入则以此参数计算
+	 * @param wr					WR指标,传入则以此参数计算
+	 */
+	public static void individuationIndicatorCalculate(List<MarketQuotation> marketQuotationList,
+													   int indicatorSetScale,
+													   KDJParams kdj,
+													   MacdParams macd,
+													   BollParams boll,
+													   DmiParams dmi,
+													   TdParams td,
+													   CCI cci,
+													   MA ma,
+													   EMA ema,
+													   RSI rsi,
+													   BiasParams bias,
+													   WrParams wr){
+		if(ObjectUtil.isNull(indicatorSetScale)){
+			indicatorSetScale = 2;
+		}
+		List<IndicatorCalculator<MarketQuotation, ?>> indicatorCalculatorList =  new ArrayList<>();
+		if(ObjectUtil.isNull(kdj)){
+			indicatorCalculatorList.add(KDJ.buildCalculator(kdj.getCapacity(),kdj.getKCycle(),kdj.getDCycle(),MarketQuotation::setKdj,MarketQuotation::getKdj));
+		}
+		if(ObjectUtil.isNull(macd)){
+			indicatorCalculatorList.add(MACD.buildCalculator(macd.getFastCycle(),macd.getSlowCycle(),macd.getDifCycle(),indicatorSetScale,MarketQuotation::setMacd,MarketQuotation::getMacd));
+		}
+		if(ObjectUtil.isNull(boll)){
+			// BOLL-计算器
+			indicatorCalculatorList.add(BOLL.buildCalculator(boll.getCapacity(), boll.getD(),indicatorSetScale,MarketQuotation::setBoll,MarketQuotation::getBoll));
+		}
+		if(ObjectUtil.isNull(dmi)){
+			// DMI-计算
+			indicatorCalculatorList.add(DMI.buildCalculator(dmi.getDiPeriod(), dmi.getAdxPeriod(),MarketQuotation::setDmi,MarketQuotation::getDmi));
+		}
+
+		if(ObjectUtil.isNull(td)){
+			// TD九转序列-计算器
+			indicatorCalculatorList.add(TD.buildCalculator(td.getCapacity(), td.getMoveSize(),MarketQuotation::setTd,MarketQuotation::getTd));
+		}
+		List<IndicatorCalculator<MarketQuotation, ?>> calculatorConfig = indicatorCalculatorList;
+		int maximum =400;//管理指标载体的最大数量
+		IndicatorWarehouseManager<LocalDateTime,MarketQuotation> calculateManager = new IndicatorWarehouseManager<>(maximum, calculatorConfig);
+		//循环-管理员接收 新行情数据-进行批量计算所有指标
+		for (MarketQuotation mq : marketQuotationList) {
+			calculateManager.accept(mq);
+		}
+	}
+
+
+	/**
 	 * 演示计算单个指标
-	 * @param listMarketQuotationOrderByCloseTimeAsc 行情数据
+	 * @param marketQuotationList 行情数据
 	 * @param indicatorSetScale   量价指标保留的小数点位数
 	 */
-	public static void singleIndicatorCalculate(List<MarketQuotation> listMarketQuotationOrderByCloseTimeAsc, int indicatorSetScale) {
+	public static void singleIndicatorCalculate(List<MarketQuotation> marketQuotationList, int indicatorSetScale) {
 		// 布林带计算
 		IndicatorCalculator<MarketQuotation,BOLL> bollCalculator =BOLL.buildCalculator(400,2d,indicatorSetScale,MarketQuotation::setBoll,MarketQuotation::getBoll);
-		listMarketQuotationOrderByCloseTimeAsc.stream().forEach(item ->{
+		marketQuotationList.stream().forEach(item ->{
 			BOLL boll = bollCalculator.input(item);
 			item.setBoll(boll);
 		});
@@ -35,10 +102,10 @@ public class IndicatorCalculateUtil {
 
 	/**
 	 * 计算全部指标,指标参数使用默认值
-	 * @param listMarketQuotationOrderByCloseTimeAsc 行情数据
+	 * @param marketQuotationList 行情数据
 	 * @param indicatorSetScale   量价指标保留的小数点位数
 	 */
-	public static void multipleIndicatorCalculate(List<MarketQuotation> listMarketQuotationOrderByCloseTimeAsc, int indicatorSetScale) {
+	public static void multipleIndicatorCalculate(List<MarketQuotation> marketQuotationList, int indicatorSetScale) {
 		if(ObjectUtil.isNull(indicatorSetScale)){
 			indicatorSetScale = 2;
 		}
@@ -47,7 +114,7 @@ public class IndicatorCalculateUtil {
 		IndicatorWarehouseManager<LocalDateTime,MarketQuotation> calculateManager = new IndicatorWarehouseManager<>(maximum, calculatorConfig);
 
 		//循环-管理员接收 新行情数据-进行批量计算所有指标
-		for (MarketQuotation mq : listMarketQuotationOrderByCloseTimeAsc) {
+		for (MarketQuotation mq : marketQuotationList) {
 			calculateManager.accept(mq);
 		}
 	}

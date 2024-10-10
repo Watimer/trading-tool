@@ -14,6 +14,9 @@ import com.wizard.common.enums.ContractTypeEnum;
 import com.wizard.common.enums.ExchangeEnum;
 import com.wizard.common.enums.IntervalEnum;
 import com.wizard.common.enums.PushEnum;
+import com.wizard.common.model.BollParams;
+import com.wizard.common.model.KDJParams;
+import com.wizard.common.model.MacdParams;
 import com.wizard.common.model.MarketQuotation;
 import com.wizard.common.utils.DataTransformationUtil;
 import com.wizard.common.utils.IndicatorCalculateUtil;
@@ -29,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import xlc.quant.data.indicator.calculator.DMI;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
@@ -253,6 +257,14 @@ public class FutureServiceImpl implements FutureService {
 		log.info("计算全部指标，结束");
 		IndicatorCalculateUtil.singleIndicatorCalculate(marketQuotationList,2);
 		log.info("计算单个指标，结束");
+		KDJParams kdjParams = KDJParams.builder().kCycle(3).dCycle(3).build();
+		kdjParams.setCapacity(9);
+		MacdParams macdParams = MacdParams.builder().fastCycle(12).slowCycle(26).difCycle(9).build();
+		BollParams bollParams = BollParams.builder().d(2).build();
+		bollParams.setCapacity(400);
+		IndicatorCalculateUtil.individuationIndicatorCalculate(marketQuotationList,
+				2,kdjParams, macdParams, bollParams,null,null,null,null,null,null,null,null);
+		log.info("计算自定义指标，结束");
 		return marketQuotationList;
 	}
 }

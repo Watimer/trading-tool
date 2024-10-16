@@ -181,7 +181,7 @@ public class FutureServiceImpl implements FutureService {
 	/**
 	 * 检测资金费率
 	 *
-	 * @param logId
+	 * @param logId		日志ID
 	 */
 	@Override
 	public void getRate(Long logId) {
@@ -193,21 +193,39 @@ public class FutureServiceImpl implements FutureService {
 			List<SymbolFundingRateVO> symbolFundingRateVOList = JSONArray.parseArray(result,SymbolFundingRateVO.class);
 			// 过滤出负费率标的
 			BigDecimal bigDecimal = new BigDecimal("0");
-			List<SymbolFundingRateVO> tempList = symbolFundingRateVOList.stream()
+			List<SymbolFundingRateVO> negativeRateList = symbolFundingRateVOList.stream()
 					.filter(item -> item.getFundingRate().compareTo(bigDecimal)<0)
 					.sorted(Comparator.comparing(SymbolFundingRateVO::getFundingRate))
 					.collect(Collectors.toList());
-			if(!tempList.isEmpty()){
-				StringBuffer stringBuffer = new StringBuffer();
-				stringBuffer.append("警报类型:资金费率").append("\n");
-				for (SymbolFundingRateVO symbolFundingRateVO:tempList) {
+			StringBuffer stringBuffer = new StringBuffer();
+			stringBuffer.append("警报类型:资金费率").append("\n");
+			if(!negativeRateList.isEmpty()){
+				if(negativeRateList.size() > 5){
+					negativeRateList = negativeRateList.subList(0,5);
+				}
+				stringBuffer.append("负费率TOP5标的").append("\n");
+				for (SymbolFundingRateVO symbolFundingRateVO:negativeRateList) {
 					BigDecimal rateResult = symbolFundingRateVO.getFundingRate().multiply(new BigDecimal("100"));
 					stringBuffer.append("标的:").append(symbolFundingRateVO.getSymbol()).append(",资金费率:").append(String.format("%.4f%%",rateResult)).append("\n");
 				}
-				stringBuffer.append("时间:").append(DateUtil.now());
-				pushService.pushManySymbol(logId,stringBuffer.toString());
 			}
-			log.info("{}",result);
+			// 过滤出正费率
+			List<SymbolFundingRateVO> positiveRateList  = symbolFundingRateVOList.stream()
+					.filter(item -> item.getFundingRate().compareTo(bigDecimal)>0)
+					.sorted(Comparator.comparing(SymbolFundingRateVO::getFundingRate))
+					.collect(Collectors.toList());
+			if(!positiveRateList.isEmpty()){
+				if(positiveRateList.size() > 5){
+					positiveRateList = positiveRateList.subList(0,5);
+				}
+				stringBuffer.append("\n").append("正费率TOP5标的").append("\n");
+				for (SymbolFundingRateVO symbolFundingRateVO:positiveRateList) {
+					BigDecimal rateResult = symbolFundingRateVO.getFundingRate().multiply(new BigDecimal("100"));
+					stringBuffer.append("标的:").append(symbolFundingRateVO.getSymbol()).append(",资金费率:").append(String.format("%.4f%%",rateResult)).append("\n");
+				}
+			}
+			stringBuffer.append("时间:").append(DateUtil.now());
+			pushService.pushManySymbol(logId,stringBuffer.toString());
 		} catch (BinanceConnectorException e) {
 			log.error("fullErrMessage: {}", e.getMessage(), e);
 		} catch (BinanceClientException e) {

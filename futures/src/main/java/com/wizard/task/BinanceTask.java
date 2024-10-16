@@ -55,31 +55,14 @@ public class BinanceTask {
 	/**
 	 * 计算币安费率
 	 * 从零时开始,每四小执行一次
-	 * 并推送负费率数据
+	 * 并推送费率数据
 	 */
 	@Async
-//	@Scheduled(fixedRate = 4 * 60 * 60 * 1000)
+	@Scheduled(cron = "4 0 0/4 * * ?")
 	public void getRate(){
 		Long logId = IdWorker.getId();
 		log.info("日志ID:{},开始检测当前资金费率",logId);
 		futureService.getRate(logId);
 		log.info("日志ID:{},完成检测当前资金费率",logId);
 	}
-
-	//public static void main(String[] args) {
-	//	UMWebsocketClientImpl client = new UMWebsocketClientImpl();
-	//	List<String> lookList = Arrays.asList("BTCUSDT","ETHUSDT","SOLUSDT","BNBUSDT");
-	//	client.allTickerStream(event->{
-	//		List<KLine> kLines = JSONArray.parseArray(event.toString(),KLine.class);
-	//		kLines.stream().forEach(item->{
-	//			// 标的
-	//			String symbol = item.getS();
-	//			// 当前价格
-	//			String currentPrice = item.getC();
-	//			if(lookList.contains(symbol)){
-	//				System.out.println(DateUtil.now()+", 标的:【"+symbol+"】, 当前价格:【"+currentPrice+"】");
-	//			}
-	//		});
-	//	});
-	//}
 }

@@ -43,5 +43,10 @@ public class TradingViewStrongSymbolVO implements Serializable {
 	 */
 	private BigDecimal increaseInPrice;
 
+	/**
+	 * 三日内是否首次入选
+	 */
+	private String firstFlag;
 
+	private String tags;
 }

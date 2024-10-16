@@ -1,7 +1,7 @@
 
 # 飞书配置
 FEISHU:
-  FS_WEBHOOK_URL: https://open.feishu.cn/open-apis/bot/v2/hook/48e0a8c2-b69e-466f-a4ab-
+  FS_WEBHOOK_URL: https://open.feishu.cn/open-apis/bot/v2/hook/48e0a8c2-b69e-466f-a4ab-9928b8657568,https://open.feishu.cn/open-apis/bot/v2/hook/ebce6b7d-c707-4eb6-ad7a-be349ec0415f
 
 # 代理地址
 PROXY:

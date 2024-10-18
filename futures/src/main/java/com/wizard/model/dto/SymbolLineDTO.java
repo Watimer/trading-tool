@@ -2,6 +2,7 @@ package com.wizard.model.dto;
 
 import com.wizard.common.enums.ContractTypeEnum;
 import com.wizard.common.enums.IntervalEnum;
+import lombok.Builder;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -12,13 +13,14 @@ import java.io.Serializable;
  * @desc
  */
 @Data
+@Builder
 public class SymbolLineDTO implements Serializable {
 
 	private String symbol;
 
-	private IntervalEnum interval;
+	private String interval;
 
-	private ContractTypeEnum contractType;
+	private String contractType;
 
 	private Integer limit;
 }

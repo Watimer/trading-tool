@@ -1,6 +1,8 @@
 package com.wizard.push.serivce.impl;
 
 import cn.hutool.core.net.NetUtil;
+import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.http.HttpRequest;
 import com.alibaba.fastjson.JSONObject;
 import com.wizard.common.enums.ExchangeEnum;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author 巫师
@@ -97,13 +100,18 @@ public class PushServiceImpl implements PushService {
 					.execute()
 					.body();
 			JSONObject jsonFeiShu = JSONObject.parseObject(feiShuResult);
-			log.info("日志ID:{},本机IP:{},飞书机器人返回信息:{}",logId, NetUtil.localIpv4s().toString(),feiShuResult);
-			if(0==jsonFeiShu.getInteger("StatusCode")){
-				log.info("日志ID:{},消息发送成功",logId);
-				resultFlag = Boolean.TRUE;
+			if(ObjectUtil.isNull(jsonFeiShu)){
+				log.error("日志ID:{},推送消息结果转化失败",logId);
 			} else {
-				log.error("日志ID:{},消息发送失败",logId);
-				resultFlag = Boolean.FALSE;
+				log.info("日志ID:{},本机IP:{},飞书机器人返回信息:{}",logId, NetUtil.localIpv4s().toString(),feiShuResult);
+				if(0==jsonFeiShu.getInteger("StatusCode")){
+					log.info("日志ID:{},消息发送成功",logId);
+					resultFlag = Boolean.TRUE;
+					ThreadUtil.sleep(2, TimeUnit.SECONDS);
+				} else {
+					log.error("日志ID:{},消息发送失败",logId);
+					resultFlag = Boolean.FALSE;
+				}
 			}
 		}
 		return resultFlag;

@@ -27,4 +27,15 @@ public enum ContractTypeEnum {
 		this.code = code;
 		this.name = name;
 	}
+
+	// 根据 code 查找对应的枚举对象
+	public static ContractTypeEnum fromCode(String code) {
+		for (ContractTypeEnum status : ContractTypeEnum.values()) {
+			if (status.getCode() == code) {
+				return status;
+			}
+		}
+		// 如果没有找到，抛出异常或者返回 null
+		throw new IllegalArgumentException("Unknown code: " + code);
+	}
 }

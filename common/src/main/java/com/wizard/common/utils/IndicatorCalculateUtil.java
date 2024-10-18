@@ -148,9 +148,9 @@ public class IndicatorCalculateUtil {
 
 		// 技术指标===单属性值指标 XXX
 		// TD九转序列-计算器
-		indicatorCalculatorList.add(TD.buildCalculator(9, 4,MarketQuotation::setTd,MarketQuotation::getTd));
+		indicatorCalculatorList.add(TD.buildCalculator(13, 4,MarketQuotation::setTd,MarketQuotation::getTd));
 		// CCI-计算器: 顺势指标
-		indicatorCalculatorList.add(CCI.buildCalculator(14,indicatorSetScale,MarketQuotation::setCci14,MarketQuotation::getCci14));
+		indicatorCalculatorList.add(CCI.buildCalculator(30,indicatorSetScale,MarketQuotation::setCci14,MarketQuotation::getCci14));
 
 		//MA-计算器: 移动平均线
 		indicatorCalculatorList.add(MA.buildCalculator(5,indicatorSetScale,MarketQuotation::setMa5));

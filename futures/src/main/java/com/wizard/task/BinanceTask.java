@@ -58,11 +58,20 @@ public class BinanceTask {
 	 * 并推送费率数据
 	 */
 	@Async
-	@Scheduled(cron = "4 0 0/4 * * ?")
+	//@Scheduled(cron = "4 0 0/4 * * ?")
 	public void getRate(){
 		Long logId = IdWorker.getId();
 		log.info("日志ID:{},开始检测当前资金费率",logId);
 		futureService.getRate(logId);
 		log.info("日志ID:{},完成检测当前资金费率",logId);
+	}
+
+	/**
+	 * 指标信号通知
+	 */
+	@Scheduled(fixedRate = 20000)
+	public void indicatorSignal(){
+		Long logId = IdWorker.getId();
+		futureService.indicatorSignal(logId);
 	}
 }

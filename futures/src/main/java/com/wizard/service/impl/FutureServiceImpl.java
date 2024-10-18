@@ -1,7 +1,10 @@
 package com.wizard.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpRequest;
@@ -246,19 +249,19 @@ public class FutureServiceImpl implements FutureService {
 	    String targetUrl = PrivateConfig.UM_BASE_URL + url;
 		StringBuffer params = new StringBuffer();
 		params.append("?pair=").append(symbolLineDTO.getSymbol());
-		if(ObjectUtil.isNull(symbolLineDTO.getContractType())){
-			symbolLineDTO.setContractType(ContractTypeEnum.PERPETUAL);
+		if(StrUtil.isBlank(symbolLineDTO.getContractType())){
+			symbolLineDTO.setContractType(ContractTypeEnum.PERPETUAL.getCode());
 		}
-		if(ObjectUtil.isNull(symbolLineDTO.getInterval())){
-			symbolLineDTO.setInterval(IntervalEnum.FOUR_HOUR);
+		if(StrUtil.isBlank(symbolLineDTO.getInterval())){
+			symbolLineDTO.setInterval(IntervalEnum.FOUR_HOUR.getCode());
 		}
 		if(ObjectUtil.isNull(symbolLineDTO.getLimit())){
 			symbolLineDTO.setLimit(1000);
 		}
 		// 合约类型
-		params.append("&contractType=").append(symbolLineDTO.getContractType().getCode());
+		params.append("&contractType=").append(symbolLineDTO.getContractType());
 		// 时间级别
-		params.append("&interval=").append(symbolLineDTO.getInterval().getCode());
+		params.append("&interval=").append(symbolLineDTO.getInterval());
 		// 限制数量
 		params.append("&limit=").append(symbolLineDTO.getLimit());
 		String resultUrl = targetUrl+params;
@@ -280,9 +283,42 @@ public class FutureServiceImpl implements FutureService {
 		MacdParams macdParams = MacdParams.builder().fastCycle(12).slowCycle(26).difCycle(9).build();
 		BollParams bollParams = BollParams.builder().d(2).build();
 		bollParams.setCapacity(400);
-		IndicatorCalculateUtil.individuationIndicatorCalculate(marketQuotationList,
-				2,kdjParams, macdParams, bollParams,null,null,null,null);
+		//IndicatorCalculateUtil.individuationIndicatorCalculate(marketQuotationList,
+		//		2,kdjParams, macdParams, bollParams,null,null,null,null);
 		log.info("计算自定义指标，结束");
 		return marketQuotationList;
+	}
+
+
+	/**
+	 * 指标信号通知
+	 *
+	 * @param logId 日志ID
+	 */
+	@Override
+	public void indicatorSignal(Long logId) {
+		SymbolLineDTO symbolLineDTO = SymbolLineDTO.builder()
+				.symbol("BTCUSDT")
+				.contractType(ContractTypeEnum.PERPETUAL.getCode())
+				.interval(IntervalEnum.ONE_HOUR.getCode())
+				.limit(1000).build();
+		List<MarketQuotation> marketQuotationList = getContinuousKLines(symbolLineDTO);
+		// 行情数据根据收盘时间降序排序
+		marketQuotationList.sort(Comparator.comparing(MarketQuotation::getCloseTime).reversed());
+
+		// 筛选TD指标
+		List<MarketQuotation> tdList = marketQuotationList.stream().filter(item -> item.getTd() != null && (item.getTd() < -8 || item.getTd() > 8) && DateUtil.between(DateUtil.date(item.getCloseTime().toLocalDate()), new Date(),DateUnit.HOUR) < 24).collect(Collectors.toList());
+		// 存在TD信号
+		if(CollUtil.isNotEmpty(tdList)){
+			tdList.stream().forEach(item ->{
+				log.info("日志ID:{},开盘时间:{},收盘时间:{},TD数据:{}",logId,item.getTimestamp(),item.getCloseTime(),item.getTd());
+			});
+		}
+		// 获取前二K数据,并计算是否触及MA120
+		List<MarketQuotation> ma120List = marketQuotationList.subList(0,2);
+		ma120List.stream().forEach(item ->{
+			log.info("日志ID:{},开盘时间:{},收盘时间:{},当前价格:{},MA120数据:{}",logId,item.getTimestamp(),item.getCloseTime(),item.getClose(),item.getMa120());
+		});
+
 	}
 }

@@ -39,4 +39,10 @@ public interface FutureService {
 	 * @return
 	 */
 	List<MarketQuotation> getContinuousKLines(SymbolLineDTO symbolLineDTO);
+
+	/**
+	 * 指标信号通知
+	 * @param logId		日志ID
+	 */
+	void indicatorSignal(Long logId);
 }

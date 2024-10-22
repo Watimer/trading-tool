@@ -48,8 +48,8 @@ PROXY:
 #  URL: https://trade1818.top/https/fapi.binance.com
   URL: https://fapi.binance.com
 BINANCE:
-  API_KEY: 89wPwxLAkzIz2MsFNZtWMRM449QLDvP7ncWup9bpbWo9pO7YhVxIc0m8stDHDtDC
-  SECRET_KEY: 11NjXeXSV3onWKtKmwpG3HTRwp9v86jg54zruGYhX4nJc0n7vLfmYxHAc2S6jVrt
+  API_KEY: bLRZ0KadDOFwzi4wykvUaztZPqEy1vVtqXHSZTiJsXZh8QbXpKAJBhTZxnwRzpA8
+  SECRET_KEY: MlUXOcLE79Bx4ld7YnYS6hSjKzxhgOOzEdT8sS9bHZ1GLYFrITMYbxE8WHt7y3Hg
 
 # 持仓变动
 ADD_NUMBER: 1.05

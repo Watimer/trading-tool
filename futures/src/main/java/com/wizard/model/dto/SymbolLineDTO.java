@@ -1,7 +1,5 @@
 package com.wizard.model.dto;
 
-import com.wizard.common.enums.ContractTypeEnum;
-import com.wizard.common.enums.IntervalEnum;
 import lombok.Builder;
 import lombok.Data;
 

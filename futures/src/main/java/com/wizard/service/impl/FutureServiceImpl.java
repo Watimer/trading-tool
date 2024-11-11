@@ -317,10 +317,88 @@ public class FutureServiceImpl implements FutureService {
 		List<SymbolBollVO> weakList = symbolBollVOList.stream().filter(item -> !item.getMFlag()).collect(Collectors.toList());
 
 		strongList.stream().forEach(item -> {
-			FileUtil.appendUtf8String(item.getSymbol(),"/Users/yueyaoli/Documents/中科睿见/强势.txt");
+			FileUtil.appendUtf8String(item.getInterval()+"-"+item.getSymbol(),"/Users/yueyaoli/Documents/中科睿见/强势.txt");
 		});
 		log.info("日志ID:{},强势:{}",logId,JSONObject.toJSONString(strongList));
 		log.info("日志ID:{},弱势:{}",logId,JSONObject.toJSONString(weakList));
+
+		// 分别取值
+		List<SymbolBollVO> oneHourMoreThanM = symbolBollVOList.stream().filter(item -> item.getInterval().equals(IntervalEnum.ONE_HOUR.getName()) && item.getMFlag()).collect(Collectors.toList());
+		List<SymbolBollVO> oneHourLessThanM = symbolBollVOList.stream().filter(item -> item.getInterval().equals(IntervalEnum.ONE_HOUR.getName()) && !item.getMFlag()).collect(Collectors.toList());
+
+		List<SymbolBollVO> fourHourMoreThanM = symbolBollVOList.stream().filter(item -> item.getInterval().equals(IntervalEnum.FOUR_HOUR.getName()) && item.getMFlag()).collect(Collectors.toList());
+		List<SymbolBollVO> fourHourLessThanM = symbolBollVOList.stream().filter(item -> item.getInterval().equals(IntervalEnum.FOUR_HOUR.getName()) && !item.getMFlag()).collect(Collectors.toList());
+
+		List<SymbolBollVO> dayHourMoreThanM = symbolBollVOList.stream().filter(item -> item.getInterval().equals(IntervalEnum.ONE_DAY.getName()) && item.getMFlag()).collect(Collectors.toList());
+		List<SymbolBollVO> dayHourLessThanM = symbolBollVOList.stream().filter(item -> item.getInterval().equals(IntervalEnum.ONE_DAY.getName()) && !item.getMFlag()).collect(Collectors.toList());
+
+		List<SymbolBollVO> hourThanM = symbolBollVOList.stream().filter(item -> item.getInterval().equals(IntervalEnum.FOUR_HOUR.getName()) && item.getMFlag()).collect(Collectors.toList());
+		List<SymbolBollVO> dayLessM = symbolBollVOList.stream().filter(item -> item.getInterval().equals(IntervalEnum.ONE_DAY.getName()) && !item.getMFlag()).collect(Collectors.toList());
+
+		hourThanM.retainAll(dayLessM);
+
+		List<SymbolBollVO> oneFourDayMoreThanM = new ArrayList<>();
+		oneFourDayMoreThanM.addAll(oneHourMoreThanM);
+		oneFourDayMoreThanM.retainAll(fourHourMoreThanM);
+		oneFourDayMoreThanM.retainAll(dayHourMoreThanM);
+
+		FileUtil.appendUtf8String("1小时、4小时、1天均超过中轨\n","/Users/yueyaoli/Documents/中科睿见/4小时大于中轨日线小于中轨.txt");
+		for (SymbolBollVO item:oneFourDayMoreThanM) {
+			FileUtil.appendUtf8String(item.getInterval()+"-"+item.getSymbol()+"\n","/Users/yueyaoli/Documents/中科睿见/4小时大于中轨日线小于中轨.txt");
+		}
+		FileUtil.appendUtf8String("----------------------\n","/Users/yueyaoli/Documents/中科睿见/4小时大于中轨日线小于中轨.txt");
+
+		List<SymbolBollVO> oneFourMoreThanMDayLessThanM = new ArrayList<>();
+		oneFourMoreThanMDayLessThanM.addAll(oneHourMoreThanM);
+		oneFourMoreThanMDayLessThanM.retainAll(fourHourMoreThanM);
+		oneFourMoreThanMDayLessThanM.retainAll(dayLessM);
+		FileUtil.appendUtf8String("1小时、4小时均超过中轨、1天低于中轨\n","/Users/yueyaoli/Documents/中科睿见/4小时大于中轨日线小于中轨.txt");
+		for (SymbolBollVO item:oneFourMoreThanMDayLessThanM) {
+			FileUtil.appendUtf8String(item.getInterval()+"-"+item.getSymbol()+"\n","/Users/yueyaoli/Documents/中科睿见/4小时大于中轨日线小于中轨.txt");
+		}
+		FileUtil.appendUtf8String("----------------------\n","/Users/yueyaoli/Documents/中科睿见/4小时大于中轨日线小于中轨.txt");
+
+
+		List<SymbolBollVO> oneMoreThanFourMDayLessThanM = new ArrayList<>();
+		oneMoreThanFourMDayLessThanM.addAll(oneHourMoreThanM);
+		oneMoreThanFourMDayLessThanM.retainAll(fourHourLessThanM);
+		oneFourMoreThanMDayLessThanM.retainAll(dayLessM);
+		FileUtil.appendUtf8String("1小时超过中轨、4小时1天均低于中轨\n","/Users/yueyaoli/Documents/中科睿见/4小时大于中轨日线小于中轨.txt");
+		for (SymbolBollVO item:oneMoreThanFourMDayLessThanM) {
+			FileUtil.appendUtf8String(item.getInterval()+"-"+item.getSymbol()+"\n","/Users/yueyaoli/Documents/中科睿见/4小时大于中轨日线小于中轨.txt");
+		}
+		FileUtil.appendUtf8String("----------------------\n","/Users/yueyaoli/Documents/中科睿见/4小时大于中轨日线小于中轨.txt");
+
+		List<SymbolBollVO> oneLessThanMFourDayMoreThanM = new ArrayList<>();
+		oneLessThanMFourDayMoreThanM.addAll(oneHourLessThanM);
+		oneLessThanMFourDayMoreThanM.retainAll(fourHourMoreThanM);
+		oneLessThanMFourDayMoreThanM.retainAll(dayHourMoreThanM);
+		FileUtil.appendUtf8String("1小时低于中轨、4小时1天超过中轨\n","/Users/yueyaoli/Documents/中科睿见/4小时大于中轨日线小于中轨.txt");
+		for (SymbolBollVO item:oneLessThanMFourDayMoreThanM) {
+			FileUtil.appendUtf8String(item.getInterval()+"-"+item.getSymbol()+"\n","/Users/yueyaoli/Documents/中科睿见/4小时大于中轨日线小于中轨.txt");
+		}
+		FileUtil.appendUtf8String("----------------------\n","/Users/yueyaoli/Documents/中科睿见/4小时大于中轨日线小于中轨.txt");
+
+		List<SymbolBollVO> oneFourLessThanMDayMoreThanM = new ArrayList<>();
+		oneFourLessThanMDayMoreThanM.addAll(oneHourLessThanM);
+		oneFourLessThanMDayMoreThanM.retainAll(fourHourLessThanM);
+		oneFourLessThanMDayMoreThanM.retainAll(dayHourMoreThanM);
+		FileUtil.appendUtf8String("1小时4小时低于中轨、1天超过中轨\n","/Users/yueyaoli/Documents/中科睿见/4小时大于中轨日线小于中轨.txt");
+		for (SymbolBollVO item:oneFourLessThanMDayMoreThanM) {
+			FileUtil.appendUtf8String(item.getInterval()+"-"+item.getSymbol()+"\n","/Users/yueyaoli/Documents/中科睿见/4小时大于中轨日线小于中轨.txt");
+		}
+		FileUtil.appendUtf8String("----------------------\n","/Users/yueyaoli/Documents/中科睿见/4小时大于中轨日线小于中轨.txt");
+
+		List<SymbolBollVO> oneFourDayLessThanM = new ArrayList<>();
+		oneFourDayLessThanM.addAll(oneHourLessThanM);
+		oneFourDayLessThanM.retainAll(fourHourLessThanM);
+		oneFourDayLessThanM.retainAll(dayHourLessThanM);
+		FileUtil.appendUtf8String("1小时4小时1天低于中轨\n","/Users/yueyaoli/Documents/中科睿见/4小时大于中轨日线小于中轨.txt");
+		for (SymbolBollVO item:oneFourLessThanMDayMoreThanM) {
+			FileUtil.appendUtf8String(item.getInterval()+"-"+item.getSymbol()+"\n","/Users/yueyaoli/Documents/中科睿见/4小时大于中轨日线小于中轨.txt");
+		}
+		FileUtil.appendUtf8String("----------------------\n","/Users/yueyaoli/Documents/中科睿见/4小时大于中轨日线小于中轨.txt");
+
 
 		//SymbolLineDTO symbolLineDTO = SymbolLineDTO.builder()
 		//		.symbol("BTCUSDT")
@@ -387,7 +465,7 @@ public class FutureServiceImpl implements FutureService {
 						// 判断当前价格距离中轨的幅度
 						BigDecimal result = getRate(item.getClose(),boll.getM());
 						Boolean amplitude = Boolean.FALSE;
-						if(result.compareTo(new BigDecimal("1")) < 0){
+						if(result.compareTo(new BigDecimal("3")) < 0){
 							//log.info("日志ID:{},布林带监控逻辑,标的:{},时间周期:{},开盘时间:{},收盘时间:{},当前价格:{},布林中轨价格:{},幅度不及1%",logId,symbol,intervalEnum.getName(),item.getTimestamp(),item.getCloseTime(),item.getClose(),item.getMa120());
 							amplitude = Boolean.TRUE;
 						}

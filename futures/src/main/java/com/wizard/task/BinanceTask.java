@@ -69,7 +69,7 @@ public class BinanceTask {
 	/**
 	 * 指标信号通知
 	 */
-	@Scheduled(fixedRate = 20000)
+	//@Scheduled(fixedRate = 20000)
 	public void indicatorSignal(){
 		Long logId = IdWorker.getId();
 		futureService.indicatorSignal(logId);

@@ -1,7 +1,6 @@
 package com.wizard.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.thread.ThreadUtil;
@@ -17,9 +16,6 @@ import com.wizard.common.enums.ContractTypeEnum;
 import com.wizard.common.enums.ExchangeEnum;
 import com.wizard.common.enums.IntervalEnum;
 import com.wizard.common.enums.PushEnum;
-import com.wizard.common.model.BollParams;
-import com.wizard.common.model.KDJParams;
-import com.wizard.common.model.MacdParams;
 import com.wizard.common.model.MarketQuotation;
 import com.wizard.common.utils.DataTransformationUtil;
 import com.wizard.common.utils.IndicatorCalculateUtil;
@@ -32,6 +28,7 @@ import com.wizard.model.vo.SymbolFundingRateVO;
 import com.wizard.push.serivce.PushService;
 import com.wizard.service.FutureService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -277,19 +274,67 @@ public class FutureServiceImpl implements FutureService {
 		// 计算指标
 		IndicatorCalculateUtil.multipleIndicatorCalculate(marketQuotationList,2);
 		log.info("计算全部指标，结束");
-		//IndicatorCalculateUtil.singleIndicatorCalculate(marketQuotationList,2);
-		//log.info("计算单个指标，结束");
-		//KDJParams kdjParams = KDJParams.builder().kCycle(3).dCycle(3).build();
-		//kdjParams.setCapacity(9);
-		//MacdParams macdParams = MacdParams.builder().fastCycle(12).slowCycle(26).difCycle(9).build();
-		//BollParams bollParams = BollParams.builder().d(2).build();
-		//bollParams.setCapacity(400);
-		//IndicatorCalculateUtil.individuationIndicatorCalculate(marketQuotationList,
-		//		2,kdjParams, macdParams, bollParams,null,null,null,null);
-		//log.info("计算自定义指标，结束");
 		return marketQuotationList;
 	}
 
+	/**
+	 * 成交量监控
+	 * @param logId 日志ID
+	 */
+	@Override
+	public void monitorVolume(Long logId) {
+	   List<String> symbolList = globalListComponent.getGlobalList();
+	   StringBuffer stringBuffer = new StringBuffer();
+	   stringBuffer.append("测试数据-警报类型: 交易量异常【庄神指标】").append("\n");
+	   stringBuffer.append("说明：使用最近三根已收盘的K线数据,收盘价需高于前一根K线的收盘价").append("\n");
+	   stringBuffer.append("强势标的:成交量连续是前一根K线的3倍及以上").append("\n");
+	   stringBuffer.append("一般标的:最近一根收盘K线的成交量是前一根K线的3倍及以上").append("\n");
+	   StringBuffer storge = new StringBuffer();
+	   storge.append("强势标的:").append("\n");
+	   StringBuffer other = new StringBuffer();
+	   other.append("一般标的:").append("\n");
+	   AtomicReference<Boolean> pushFlag = new AtomicReference<>(false);
+	   symbolList.forEach(symbol->{
+		   // 计算成交量
+		   try {
+		   		SymbolLineDTO symbolLineDTO = SymbolLineDTO.builder()
+				   .symbol(symbol)
+				   .interval(IntervalEnum.ONE_HOUR.getCode())
+				   .contractType(ContractTypeEnum.PERPETUAL.getCode())
+				   .limit(4)
+				   .build();
+			   // 获取交易数据
+			   List<MarketQuotation> marketQuotationList = getContinuousKLines(symbolLineDTO);
+			   BigDecimal volumeOne = BigDecimal.valueOf(marketQuotationList.get(1).getVolume());
+			   BigDecimal volumeTwo = BigDecimal.valueOf(marketQuotationList.get(2).getVolume());
+			   BigDecimal volumeThree = BigDecimal.valueOf(marketQuotationList.get(3).getVolume());
+			   BigDecimal one_two = volumeOne.divide(volumeTwo,2);
+			   BigDecimal two_three = volumeTwo.divide(volumeThree,2);
+			   BigDecimal priceOne = BigDecimal.valueOf(marketQuotationList.get(1).getClose());
+			   BigDecimal priceTwo = BigDecimal.valueOf(marketQuotationList.get(2).getClose());
+			   BigDecimal priceThree = BigDecimal.valueOf(marketQuotationList.get(3).getClose());
+			   if(one_two.compareTo(new BigDecimal("3")) > 0 && priceOne.compareTo(priceTwo) > 0){
+				   pushFlag.set(true);
+				   if(two_three.compareTo(new BigDecimal("3")) > 0 && priceTwo.compareTo(priceThree) > 0){
+						// 强烈建议
+					   storge.append(symbol).append("、");
+				   } else {
+					   // 一般情况
+					   other.append(symbol).append("、");
+				   }
+			   } else {
+				   // 不建议
+			   }
+		   } catch (Exception e) {
+			   log.error("日志ID:{},计算交易量错误",logId);
+		   }
+		   ThreadUtil.sleep(1,TimeUnit.SECONDS);
+	   });
+	   if(pushFlag.get()){
+		   stringBuffer.append(storge.append("\n")).append(other.append("\n"));
+		   pushService.pushManySymbol(logId,stringBuffer.toString());
+	   }
+	}
 
 	/**
 	 * 指标信号通知

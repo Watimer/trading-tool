@@ -74,4 +74,14 @@ public class BinanceTask {
 		Long logId = IdWorker.getId();
 		futureService.indicatorSignal(logId);
 	}
+
+	/**
+	 * 成交量监控
+	 */
+	@Async
+	@Scheduled(fixedRate = 20000)
+	public void monitorVolume(){
+		Long logId = IdWorker.getId();
+		futureService.monitorVolume(logId);
+	}
 }

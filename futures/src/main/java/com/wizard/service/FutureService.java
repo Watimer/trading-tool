@@ -45,4 +45,10 @@ public interface FutureService {
 	 * @param logId		日志ID
 	 */
 	void indicatorSignal(Long logId);
+
+	/**
+	 * 成交量监控
+	 * @param logId 	日志ID
+	 */
+	void monitorVolume(Long logId);
 }

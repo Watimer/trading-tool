@@ -4,6 +4,7 @@ import lombok.Data;
 import xlc.quant.data.indicator.IndicatorCalculateCarrier;
 import xlc.quant.data.indicator.calculator.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -25,21 +26,27 @@ public class MarketQuotation implements IndicatorCalculateCarrier<LocalDateTime>
 
 	/** 开盘价 */
 	private Double open;
+	private BigDecimal bigDecimalOpen;
 
 	/** 最低价 */
 	private Double low;
+	private BigDecimal bigDecimalLow;
 
 	/** 最高价 */
 	private Double high;
+	private BigDecimal bigDecimalHigh;
 
 	/** 收盘价(当前K线未结束的即为最新交易价) */
 	private Double close;
+	private BigDecimal bigDecimalClose;
 
 	/** 成交量 */
 	private Double volume;
+	private BigDecimal bigDecimalVolume;
 
 	/** 成交额 */
 	private Double amount;
+	private BigDecimal bigDecimalAmount;
 
 	// =======================
 	// 上面的属性值，一般情况下，分时和日行情都有

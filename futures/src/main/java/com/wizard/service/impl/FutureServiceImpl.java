@@ -28,7 +28,6 @@ import com.wizard.model.vo.SymbolFundingRateVO;
 import com.wizard.push.serivce.PushService;
 import com.wizard.service.FutureService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -36,6 +35,7 @@ import xlc.quant.data.indicator.calculator.BOLL;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -285,16 +285,19 @@ public class FutureServiceImpl implements FutureService {
 	public void monitorVolume(Long logId) {
 	   List<String> symbolList = globalListComponent.getGlobalList();
 	   StringBuffer stringBuffer = new StringBuffer();
-	   stringBuffer.append("测试数据-警报类型: 交易量异常【庄神指标】").append("\n");
+	   stringBuffer.append("警报类型: 交易量异常【庄神指标】").append("\n").append("\n");
 	   stringBuffer.append("说明：使用最近三根已收盘的K线数据,收盘价需高于前一根K线的收盘价").append("\n");
 	   stringBuffer.append("强势标的:成交量连续是前一根K线的3倍及以上").append("\n");
-	   stringBuffer.append("一般标的:最近一根收盘K线的成交量是前一根K线的3倍及以上").append("\n");
+	   stringBuffer.append("一般标的:最近一根收盘K线的成交量是前一根K线的3倍及以上").append("\n").append("\n");
 	   StringBuffer storge = new StringBuffer();
 	   storge.append("强势标的:").append("\n");
 	   StringBuffer other = new StringBuffer();
 	   other.append("一般标的:").append("\n");
 	   AtomicReference<Boolean> pushFlag = new AtomicReference<>(false);
-	   symbolList.forEach(symbol->{
+
+	   AtomicReference<Boolean> storgeFlag = new AtomicReference<>(false);
+	   AtomicReference<Boolean> otherFlag = new AtomicReference<>(false);
+	   symbolList.stream().forEach(symbol->{
 		   // 计算成交量
 		   try {
 		   		SymbolLineDTO symbolLineDTO = SymbolLineDTO.builder()
@@ -305,22 +308,40 @@ public class FutureServiceImpl implements FutureService {
 				   .build();
 			   // 获取交易数据
 			   List<MarketQuotation> marketQuotationList = getContinuousKLines(symbolLineDTO);
-			   BigDecimal volumeOne = BigDecimal.valueOf(marketQuotationList.get(1).getVolume());
-			   BigDecimal volumeTwo = BigDecimal.valueOf(marketQuotationList.get(2).getVolume());
-			   BigDecimal volumeThree = BigDecimal.valueOf(marketQuotationList.get(3).getVolume());
+			   // 按照收盘时间倒序排序
+			   marketQuotationList = marketQuotationList.stream().sorted(Comparator.comparing(MarketQuotation::getCloseTime).reversed()).collect(Collectors.toList());
+			   BigDecimal volumeOne = marketQuotationList.get(1).getBigDecimalVolume();
+			   BigDecimal volumeTwo = marketQuotationList.get(2).getBigDecimalVolume();
+			   BigDecimal volumeThree = marketQuotationList.get(3).getBigDecimalVolume();
 			   BigDecimal one_two = volumeOne.divide(volumeTwo,2);
 			   BigDecimal two_three = volumeTwo.divide(volumeThree,2);
-			   BigDecimal priceOne = BigDecimal.valueOf(marketQuotationList.get(1).getClose());
-			   BigDecimal priceTwo = BigDecimal.valueOf(marketQuotationList.get(2).getClose());
-			   BigDecimal priceThree = BigDecimal.valueOf(marketQuotationList.get(3).getClose());
-			   if(one_two.compareTo(new BigDecimal("3")) > 0 && priceOne.compareTo(priceTwo) > 0){
+			   // 获取涨跌数据
+			   BigDecimal changeOne = getRateBigDecimal(marketQuotationList.get(1).getBigDecimalClose(),marketQuotationList.get(1).getBigDecimalOpen());
+			   Boolean flagOne = false;
+			   if(changeOne.compareTo(BigDecimal.ZERO) > 0){
+				   flagOne = true;
+			   }
+			   BigDecimal changeTwo = getRateBigDecimal(marketQuotationList.get(2).getBigDecimalClose(),marketQuotationList.get(2).getBigDecimalOpen());
+			   Boolean flagTwo = false;
+			   if(changeTwo.compareTo(BigDecimal.ZERO) > 0){
+				   flagTwo = true;
+			   }
+			   BigDecimal changeThree = getRateBigDecimal(marketQuotationList.get(3).getBigDecimalClose(),marketQuotationList.get(3).getBigDecimalOpen());
+			   Boolean flagThree = false;
+			   if(changeThree.compareTo(BigDecimal.ZERO) > 0){
+				   flagThree = true;
+			   }
+			   // 前一根收盘交易量/前二收盘交易量
+			   if(one_two.compareTo(new BigDecimal("3")) > 0 && flagOne && flagTwo){
 				   pushFlag.set(true);
-				   if(two_three.compareTo(new BigDecimal("3")) > 0 && priceTwo.compareTo(priceThree) > 0){
+				   if(two_three.compareTo(new BigDecimal("3")) > 0 && flagThree){
 						// 强烈建议
 					   storge.append(symbol).append("、");
+					   storgeFlag.set(true);
 				   } else {
 					   // 一般情况
 					   other.append(symbol).append("、");
+					   otherFlag.set(true);
 				   }
 			   } else {
 				   // 不建议
@@ -328,10 +349,19 @@ public class FutureServiceImpl implements FutureService {
 		   } catch (Exception e) {
 			   log.error("日志ID:{},计算交易量错误",logId);
 		   }
-		   ThreadUtil.sleep(1,TimeUnit.SECONDS);
 	   });
 	   if(pushFlag.get()){
-		   stringBuffer.append(storge.append("\n")).append(other.append("\n"));
+		   if(storgeFlag.get()){
+			   stringBuffer.append(storge.append("\n"));
+		   } else {
+			   stringBuffer.append("强势标的: 无").append("\n");
+		   }
+		   if(otherFlag.get()){
+			   stringBuffer.append(other.append("\n"));
+		   } else {
+			   stringBuffer.append("一般标的: 无").append("\n");
+		   }
+		   stringBuffer.append("\n").append("推送时间:").append(DateUtil.now());
 		   pushService.pushManySymbol(logId,stringBuffer.toString());
 	   }
 	}
@@ -533,7 +563,19 @@ public class FutureServiceImpl implements FutureService {
 
 	}
 
-
+	/**
+	 *
+	 * @param priceA
+	 * @param priceB
+	 * @return
+	 */
+	private BigDecimal getRateBigDecimal(BigDecimal priceA, BigDecimal priceB) {
+		BigDecimal tempA = priceA.subtract(priceB);
+		BigDecimal tempB = tempA.divide(priceB,4, BigDecimal.ROUND_HALF_UP);
+		BigDecimal res = tempB.multiply(new BigDecimal("100"));
+		res.setScale(2, BigDecimal.ROUND_HALF_UP);
+		return res;
+	}
 	private BigDecimal getRate(Double priceA, Double priceB) {
 		Double res = (Math.abs(priceA - priceB) / priceB) * 100;
 		BigDecimal bigDecimal = new BigDecimal(res).setScale(2, BigDecimal.ROUND_HALF_UP);

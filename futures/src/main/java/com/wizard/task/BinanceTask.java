@@ -79,7 +79,8 @@ public class BinanceTask {
 	 * 成交量监控
 	 */
 	@Async
-	@Scheduled(fixedRate = 20000)
+	@Scheduled(cron = "1 0 0/1 * * ?")
+	//@Scheduled(fixedRate = 20000)
 	public void monitorVolume(){
 		Long logId = IdWorker.getId();
 		futureService.monitorVolume(logId);

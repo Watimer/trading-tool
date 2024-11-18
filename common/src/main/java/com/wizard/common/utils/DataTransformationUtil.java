@@ -38,16 +38,28 @@ public class DataTransformationUtil {
 
 		Double openPrice = jsonItem.getDouble(1);
 		marketQuotation.setOpen(openPrice);
+		marketQuotation.setBigDecimalOpen(jsonItem.getBigDecimal(1));
+
 		Double highPrice = jsonItem.getDouble(2);
 		marketQuotation.setHigh(highPrice);
+		marketQuotation.setBigDecimalHigh(jsonItem.getBigDecimal(2));
+
 		Double lowPrice = jsonItem.getDouble(3);
 		marketQuotation.setLow(lowPrice);
+		marketQuotation.setBigDecimalLow(jsonItem.getBigDecimal(3));
+
 		Double closePrice = jsonItem.getDouble(4);
 		marketQuotation.setClose(closePrice);
+		marketQuotation.setBigDecimalClose(jsonItem.getBigDecimal(4));
+
 		Double volume = jsonItem.getDouble(5);
 		marketQuotation.setVolume(volume);
+		marketQuotation.setBigDecimalVolume(jsonItem.getBigDecimal(5));
+
 		Double amount = jsonItem.getDouble(7);
 		marketQuotation.setAmount(amount);
+		marketQuotation.setBigDecimalAmount(jsonItem.getBigDecimal(7));
+
 		marketQuotation.setSymbol(symbol);
 		return marketQuotation;
 	}

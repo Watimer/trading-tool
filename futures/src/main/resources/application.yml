@@ -7,8 +7,8 @@ spring:
     name: futures
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://101.32.126.44:3306/trade?useUnicode=true&characterEncoding=utf-8&useSSL=false&useAffectedRows=true&autoReconnect=true
-#    url: jdbc:mysql://localhost:3306/trade?useUnicode=true&characterEncoding=utf-8&useSSL=false&useAffectedRows=true&autoReconnect=true
+#    url: jdbc:mysql://101.32.126.44:3306/trade?useUnicode=true&characterEncoding=utf-8&useSSL=false&useAffectedRows=true&autoReconnect=true
+    url: jdbc:mysql://localhost:3306/trade?useUnicode=true&characterEncoding=utf-8&useSSL=false&useAffectedRows=true&autoReconnect=true
     username: trade
     password: 123456
     hikari:
@@ -39,7 +39,7 @@ logging:
 
 # 飞书配置
 FEISHU:
-  FS_WEBHOOK_URL: https://open.feishu.cn/open-apis/bot/v2/hook/48e0a8c2-b69e-466f-a4ab-9928b8657568,https://open.feishu.cn/open-apis/bot/v2/hook/ebce6b7d-c707-4eb6-ad7a-be349ec0415f
+  FS_WEBHOOK_URL: https://open.feishu.cn/open-apis/bot/v2/hook/92dac6e7-2eae-455c-aa77-274e73e6bf3f
   APP_ID: cli_a667ab5d10ae5013
   APP_SECRET: kctKLQrmI4CxRfzrkNIWBeWGyOxixZJx
 
@@ -54,5 +54,5 @@ BINANCE:
 # 持仓变动
 ADD_NUMBER: 1.05
 
-LOG_PATH: /Users/yueyaoli/Documents/中科睿见/本地项目日志/
-#LOG_PATH: /monitor/
+#LOG_PATH: /Users/yueyaoli/Documents/中科睿见/本地项目日志/
+LOG_PATH: /monitor/

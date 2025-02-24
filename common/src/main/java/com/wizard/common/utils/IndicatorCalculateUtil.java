@@ -125,10 +125,18 @@ public class IndicatorCalculateUtil {
 		int maximum =400;//管理指标载体的最大数量
 		IndicatorWarehouseManager<LocalDateTime,MarketQuotation> calculateManager = new IndicatorWarehouseManager<>(maximum, calculatorConfig);
 
+		// 计算超级趋势
+	    List<Supertrend> supertrendList = SupertrendUtil.calculateSuperTrend(marketQuotationList,13,3);
+
 		//循环-管理员接收 新行情数据-进行批量计算所有指标
-		for (MarketQuotation mq : marketQuotationList) {
-			calculateManager.accept(mq);
+		for (int i = 0; i < marketQuotationList.size(); i++) {
+			MarketQuotation marketQuotation = marketQuotationList.get(i);
+			calculateManager.accept(marketQuotation);
+			marketQuotation.setSupertrend(supertrendList.get(i));
 		}
+		//for (MarketQuotation mq : marketQuotationList) {
+		//	calculateManager.accept(mq);
+		//}
 	}
 
 	/**
@@ -142,7 +150,7 @@ public class IndicatorCalculateUtil {
 		// MACD-计算器
 		indicatorCalculatorList.add(MACD.buildCalculator(12, 26, 9,indicatorSetScale,MarketQuotation::setMacd,MarketQuotation::getMacd));
 		// BOLL-计算器
-		indicatorCalculatorList.add(BOLL.buildCalculator(20, 2,indicatorSetScale,MarketQuotation::setBoll,MarketQuotation::getBoll));
+		indicatorCalculatorList.add(BOLL.buildCalculator(400, 2,indicatorSetScale,MarketQuotation::setBoll,MarketQuotation::getBoll));
 		// DMI-计算
 		indicatorCalculatorList.add(DMI.buildCalculator(14, 6,MarketQuotation::setDmi,MarketQuotation::getDmi));
 
@@ -183,6 +191,8 @@ public class IndicatorCalculateUtil {
 		indicatorCalculatorList.add(WR.buildCalculator(10,MarketQuotation::setWr10));
 		indicatorCalculatorList.add(WR.buildCalculator(14,MarketQuotation::setWr14));
 		indicatorCalculatorList.add(WR.buildCalculator(20,MarketQuotation::setWr20));
+
+		indicatorCalculatorList.add(ATR.buildCalculator(13,14,indicatorSetScale,MarketQuotation::setAtr,MarketQuotation::getAtr));
 
 		return indicatorCalculatorList;
 	}

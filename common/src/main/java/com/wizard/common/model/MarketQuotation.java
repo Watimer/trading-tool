@@ -1,5 +1,6 @@
 package com.wizard.common.model;
 
+import com.wizard.common.utils.ATR;
 import lombok.Data;
 import xlc.quant.data.indicator.IndicatorCalculateCarrier;
 import xlc.quant.data.indicator.calculator.*;
@@ -77,6 +78,9 @@ public class MarketQuotation implements IndicatorCalculateCarrier<LocalDateTime>
 
 	/** 布林线指标 */
 	private BOLL boll;
+
+	/** 布林线400指标 */
+	private BOLL boll400;
 
 	/** 动向指标 */
 	private DMI dmi;
@@ -157,5 +161,9 @@ public class MarketQuotation implements IndicatorCalculateCarrier<LocalDateTime>
 
 	/** 威廉20 */
 	private Double wr20;
+
+	private Supertrend supertrend;
+
+	private ATR atr;
 
 }

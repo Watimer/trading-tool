@@ -51,4 +51,16 @@ public interface FutureService {
 	 * @param logId 	日志ID
 	 */
 	void monitorVolume(Long logId);
+
+	/**
+	 * 波动预警
+	 * @param logId		日志ID
+	 */
+	void fluctuate(Long logId);
+
+	/**
+	 * 超级趋势计算
+	 * @param id
+	 */
+	void supertrend(long id);
 }

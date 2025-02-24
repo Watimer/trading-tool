@@ -58,7 +58,7 @@ public class BinanceTask {
 	 * 并推送费率数据
 	 */
 	@Async
-	//@Scheduled(cron = "4 0 0/4 * * ?")
+	@Scheduled(cron = "4 0 0/4 * * ?")
 	public void getRate(){
 		Long logId = IdWorker.getId();
 		log.info("日志ID:{},开始检测当前资金费率",logId);
@@ -84,5 +84,19 @@ public class BinanceTask {
 	public void monitorVolume(){
 		Long logId = IdWorker.getId();
 		futureService.monitorVolume(logId);
+	}
+
+	/**
+	 * 波动率推送
+	 */
+	public void fluctuate(){
+		Long logId = IdWorker.getId();
+		futureService.fluctuate(logId);
+	}
+
+	//@Scheduled(fixedRate = 20000)
+	public void supertrend(){
+		futureService.supertrend(IdWorker.getId());
+		log.info("结束");
 	}
 }

@@ -17,8 +17,10 @@ import com.wizard.common.enums.ExchangeEnum;
 import com.wizard.common.enums.IntervalEnum;
 import com.wizard.common.enums.PushEnum;
 import com.wizard.common.model.MarketQuotation;
+import com.wizard.common.model.Supertrend;
 import com.wizard.common.utils.DataTransformationUtil;
 import com.wizard.common.utils.IndicatorCalculateUtil;
+import com.wizard.common.utils.SupertrendUtil;
 import com.wizard.component.CheckComponent;
 import com.wizard.component.GlobalListComponent;
 import com.wizard.config.PrivateConfig;
@@ -278,6 +280,33 @@ public class FutureServiceImpl implements FutureService {
 	}
 
 	/**
+	 * 波动预警
+	 *
+	 * @param logId 日志ID
+	 */
+	@Override
+	public void fluctuate(Long logId) {
+		List<String> symbolList = globalListComponent.getGlobalList();
+		symbolList.stream().forEach(symbol->{
+			// 计算成交量
+			try {
+				SymbolLineDTO symbolLineDTO = SymbolLineDTO.builder()
+						.symbol(symbol)
+						.interval(IntervalEnum.FIVE_MINUTE.getCode())
+						.contractType(ContractTypeEnum.PERPETUAL.getCode())
+						.limit(4)
+						.build();
+				// 获取交易数据
+				List<MarketQuotation> marketQuotationList = getContinuousKLines(symbolLineDTO);
+				// 按照收盘时间倒序排序
+				marketQuotationList = marketQuotationList.stream().sorted(Comparator.comparing(MarketQuotation::getCloseTime).reversed()).collect(Collectors.toList());
+			} catch (Exception e) {
+				log.error("日志ID:{},计算交易量错误",logId);
+			}
+		});
+	}
+
+	/**
 	 * 成交量监控
 	 * @param logId 日志ID
 	 */
@@ -391,11 +420,6 @@ public class FutureServiceImpl implements FutureService {
 		List<SymbolBollVO> strongList = symbolBollVOList.stream().filter(item -> item.getUFlag() && item.getMFlag()).collect(Collectors.toList());
 		List<SymbolBollVO> weakList = symbolBollVOList.stream().filter(item -> !item.getMFlag()).collect(Collectors.toList());
 
-		strongList.stream().forEach(item -> {
-			FileUtil.appendUtf8String(item.getInterval()+"-"+item.getSymbol(),"/Users/yueyaoli/Documents/中科睿见/强势.txt");
-		});
-		log.info("日志ID:{},强势:{}",logId,JSONObject.toJSONString(strongList));
-		log.info("日志ID:{},弱势:{}",logId,JSONObject.toJSONString(weakList));
 
 		// 分别取值
 		List<SymbolBollVO> oneHourMoreThanM = symbolBollVOList.stream().filter(item -> item.getInterval().equals(IntervalEnum.ONE_HOUR.getName()) && item.getMFlag()).collect(Collectors.toList());
@@ -410,69 +434,6 @@ public class FutureServiceImpl implements FutureService {
 		List<SymbolBollVO> hourThanM = symbolBollVOList.stream().filter(item -> item.getInterval().equals(IntervalEnum.FOUR_HOUR.getName()) && item.getMFlag()).collect(Collectors.toList());
 		List<SymbolBollVO> dayLessM = symbolBollVOList.stream().filter(item -> item.getInterval().equals(IntervalEnum.ONE_DAY.getName()) && !item.getMFlag()).collect(Collectors.toList());
 
-		hourThanM.retainAll(dayLessM);
-
-		List<SymbolBollVO> oneFourDayMoreThanM = new ArrayList<>();
-		oneFourDayMoreThanM.addAll(oneHourMoreThanM);
-		oneFourDayMoreThanM.retainAll(fourHourMoreThanM);
-		oneFourDayMoreThanM.retainAll(dayHourMoreThanM);
-
-		FileUtil.appendUtf8String("1小时、4小时、1天均超过中轨\n","/Users/yueyaoli/Documents/中科睿见/4小时大于中轨日线小于中轨.txt");
-		for (SymbolBollVO item:oneFourDayMoreThanM) {
-			FileUtil.appendUtf8String(item.getInterval()+"-"+item.getSymbol()+"\n","/Users/yueyaoli/Documents/中科睿见/4小时大于中轨日线小于中轨.txt");
-		}
-		FileUtil.appendUtf8String("----------------------\n","/Users/yueyaoli/Documents/中科睿见/4小时大于中轨日线小于中轨.txt");
-
-		List<SymbolBollVO> oneFourMoreThanMDayLessThanM = new ArrayList<>();
-		oneFourMoreThanMDayLessThanM.addAll(oneHourMoreThanM);
-		oneFourMoreThanMDayLessThanM.retainAll(fourHourMoreThanM);
-		oneFourMoreThanMDayLessThanM.retainAll(dayLessM);
-		FileUtil.appendUtf8String("1小时、4小时均超过中轨、1天低于中轨\n","/Users/yueyaoli/Documents/中科睿见/4小时大于中轨日线小于中轨.txt");
-		for (SymbolBollVO item:oneFourMoreThanMDayLessThanM) {
-			FileUtil.appendUtf8String(item.getInterval()+"-"+item.getSymbol()+"\n","/Users/yueyaoli/Documents/中科睿见/4小时大于中轨日线小于中轨.txt");
-		}
-		FileUtil.appendUtf8String("----------------------\n","/Users/yueyaoli/Documents/中科睿见/4小时大于中轨日线小于中轨.txt");
-
-
-		List<SymbolBollVO> oneMoreThanFourMDayLessThanM = new ArrayList<>();
-		oneMoreThanFourMDayLessThanM.addAll(oneHourMoreThanM);
-		oneMoreThanFourMDayLessThanM.retainAll(fourHourLessThanM);
-		oneFourMoreThanMDayLessThanM.retainAll(dayLessM);
-		FileUtil.appendUtf8String("1小时超过中轨、4小时1天均低于中轨\n","/Users/yueyaoli/Documents/中科睿见/4小时大于中轨日线小于中轨.txt");
-		for (SymbolBollVO item:oneMoreThanFourMDayLessThanM) {
-			FileUtil.appendUtf8String(item.getInterval()+"-"+item.getSymbol()+"\n","/Users/yueyaoli/Documents/中科睿见/4小时大于中轨日线小于中轨.txt");
-		}
-		FileUtil.appendUtf8String("----------------------\n","/Users/yueyaoli/Documents/中科睿见/4小时大于中轨日线小于中轨.txt");
-
-		List<SymbolBollVO> oneLessThanMFourDayMoreThanM = new ArrayList<>();
-		oneLessThanMFourDayMoreThanM.addAll(oneHourLessThanM);
-		oneLessThanMFourDayMoreThanM.retainAll(fourHourMoreThanM);
-		oneLessThanMFourDayMoreThanM.retainAll(dayHourMoreThanM);
-		FileUtil.appendUtf8String("1小时低于中轨、4小时1天超过中轨\n","/Users/yueyaoli/Documents/中科睿见/4小时大于中轨日线小于中轨.txt");
-		for (SymbolBollVO item:oneLessThanMFourDayMoreThanM) {
-			FileUtil.appendUtf8String(item.getInterval()+"-"+item.getSymbol()+"\n","/Users/yueyaoli/Documents/中科睿见/4小时大于中轨日线小于中轨.txt");
-		}
-		FileUtil.appendUtf8String("----------------------\n","/Users/yueyaoli/Documents/中科睿见/4小时大于中轨日线小于中轨.txt");
-
-		List<SymbolBollVO> oneFourLessThanMDayMoreThanM = new ArrayList<>();
-		oneFourLessThanMDayMoreThanM.addAll(oneHourLessThanM);
-		oneFourLessThanMDayMoreThanM.retainAll(fourHourLessThanM);
-		oneFourLessThanMDayMoreThanM.retainAll(dayHourMoreThanM);
-		FileUtil.appendUtf8String("1小时4小时低于中轨、1天超过中轨\n","/Users/yueyaoli/Documents/中科睿见/4小时大于中轨日线小于中轨.txt");
-		for (SymbolBollVO item:oneFourLessThanMDayMoreThanM) {
-			FileUtil.appendUtf8String(item.getInterval()+"-"+item.getSymbol()+"\n","/Users/yueyaoli/Documents/中科睿见/4小时大于中轨日线小于中轨.txt");
-		}
-		FileUtil.appendUtf8String("----------------------\n","/Users/yueyaoli/Documents/中科睿见/4小时大于中轨日线小于中轨.txt");
-
-		List<SymbolBollVO> oneFourDayLessThanM = new ArrayList<>();
-		oneFourDayLessThanM.addAll(oneHourLessThanM);
-		oneFourDayLessThanM.retainAll(fourHourLessThanM);
-		oneFourDayLessThanM.retainAll(dayHourLessThanM);
-		FileUtil.appendUtf8String("1小时4小时1天低于中轨\n","/Users/yueyaoli/Documents/中科睿见/4小时大于中轨日线小于中轨.txt");
-		for (SymbolBollVO item:oneFourLessThanMDayMoreThanM) {
-			FileUtil.appendUtf8String(item.getInterval()+"-"+item.getSymbol()+"\n","/Users/yueyaoli/Documents/中科睿见/4小时大于中轨日线小于中轨.txt");
-		}
-		FileUtil.appendUtf8String("----------------------\n","/Users/yueyaoli/Documents/中科睿见/4小时大于中轨日线小于中轨.txt");
 
 
 		//SymbolLineDTO symbolLineDTO = SymbolLineDTO.builder()
@@ -513,6 +474,12 @@ public class FutureServiceImpl implements FutureService {
 		//}
 	}
 
+	/**
+	 * 多周期布林带计算
+	 * @param logId			日志ID
+	 * @param symbol		标的
+	 * @return 				布林指标结果
+	 */
 	public List<SymbolBollVO> monitorBollIndicator(Long logId, String symbol) {
 		log.info("日志ID:{},执行布林带监控逻辑,标的:{}",logId,symbol);
 		List<SymbolBollVO> symbolBollVOList = new ArrayList<>();
@@ -527,7 +494,7 @@ public class FutureServiceImpl implements FutureService {
 			List<MarketQuotation> marketQuotationList = getContinuousKLines(symbolLineDTO);
 			// 行情数据根据收盘时间降序排序
 			marketQuotationList.sort(Comparator.comparing(MarketQuotation::getCloseTime).reversed());
-			AtomicReference<String> res = new AtomicReference<>("");
+
 			if(CollUtil.isNotEmpty(marketQuotationList)){
 				// 获取前4K数据
 				List<MarketQuotation> lastList = marketQuotationList.subList(0,1);
@@ -580,5 +547,29 @@ public class FutureServiceImpl implements FutureService {
 		Double res = (Math.abs(priceA - priceB) / priceB) * 100;
 		BigDecimal bigDecimal = new BigDecimal(res).setScale(2, BigDecimal.ROUND_HALF_UP);
 		return bigDecimal;
+	}
+
+
+	/**
+	 * 超级趋势计算
+	 *
+	 * @param id
+	 */
+	@Override
+	public void supertrend(long id) {
+		SymbolLineDTO symbolLineDTO = SymbolLineDTO.builder()
+				.symbol("BTCUSDT")
+				.contractType(ContractTypeEnum.PERPETUAL.getCode())
+				.interval(IntervalEnum.ONE_HOUR.getCode())
+				.limit(500).build();
+		List<MarketQuotation> marketQuotationList = getContinuousKLines(symbolLineDTO);
+		// 根据 age 字段逆序排序
+		//marketQuotationList.sort(Comparator.comparing(MarketQuotation::getTimestamp).reversed());
+		List<Double> highs = marketQuotationList.stream().map(MarketQuotation::getHigh).collect(Collectors.toList());
+		List<Double> lows = marketQuotationList.stream().map(MarketQuotation::getLow).collect(Collectors.toList());
+		List<Double> closes = marketQuotationList.stream().map(MarketQuotation::getClose).collect(Collectors.toList());
+		List<Supertrend> supertrendList = SupertrendUtil.calculateSupertrend(highs, lows, closes, 13, 3);
+
+		log.info("{}", JSONObject.toJSONString(supertrendList));
 	}
 }

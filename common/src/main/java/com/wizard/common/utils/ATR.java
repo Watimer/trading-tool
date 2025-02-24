@@ -29,10 +29,10 @@ public class ATR extends Indicator {
 	}
 
 	public static <CARRIER extends IndicatorCalculateCarrier<?>> IndicatorCalculator<CARRIER, ATR> buildCalculator(
-			int period,int capacity, int indicatorSetScale,
+			int capacity,int period, int indicatorSetScale,
 			BiConsumer<CARRIER, ATR> propertySetter,
 			Function<CARRIER, ATR> propertyGetter) {
-		return new ATRCalculator<>(period,capacity,indicatorSetScale,propertySetter,propertyGetter);
+		return new ATRCalculator<>(capacity,period,indicatorSetScale,propertySetter,propertyGetter);
 	}
 
 	private static class ATRCalculator<CARRIER extends IndicatorCalculateCarrier<?>> extends IndicatorCalculator<CARRIER, ATR> {
@@ -52,10 +52,10 @@ public class ATR extends Indicator {
 
 		private final int capacity;
 
-		ATRCalculator(int period,int capacity, int indicatorSetScale,
+		ATRCalculator(int capacity,int period,int indicatorSetScale,
 					  BiConsumer<CARRIER, ATR> propertySetter,
 					  Function<CARRIER, ATR> propertyGetter){
-			super(period, true,propertySetter);
+			super(capacity, true,propertySetter);
 			this.period = period;
 			this.capacity = capacity;
 			this.indicatorSetScale = indicatorSetScale;

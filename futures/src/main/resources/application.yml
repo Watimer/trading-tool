@@ -8,7 +8,7 @@ spring:
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
 #    url: jdbc:mysql://101.32.126.44:3306/trade?useUnicode=true&characterEncoding=utf-8&useSSL=false&useAffectedRows=true&autoReconnect=true
-    url: jdbc:mysql://localhost:3306/trade?useUnicode=true&characterEncoding=utf-8&useSSL=false&useAffectedRows=true&autoReconnect=true
+    url: jdbc:mysql://101.32.126.44:3306/trade?useUnicode=true&characterEncoding=utf-8&useSSL=false&useAffectedRows=true&autoReconnect=true
     username: trade
     password: 123456
     hikari:
@@ -55,4 +55,4 @@ BINANCE:
 ADD_NUMBER: 1.05
 
 #LOG_PATH: /Users/yueyaoli/Documents/中科睿见/本地项目日志/
-LOG_PATH: /monitor/
+#LOG_PATH: /monitor/

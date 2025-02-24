@@ -1,5 +1,6 @@
 package com.wizard.common.model;
 
+import com.wizard.common.enums.IntervalEnum;
 import com.wizard.common.utils.ATR;
 import lombok.Data;
 import xlc.quant.data.indicator.IndicatorCalculateCarrier;
@@ -15,6 +16,8 @@ import java.util.List;
  */
 @Data
 public class MarketQuotation implements IndicatorCalculateCarrier<LocalDateTime> {
+
+	private IntervalEnum intervalEnum;
 
 	/** 收盘时间 */
 	private LocalDateTime closeTime;
@@ -78,9 +81,6 @@ public class MarketQuotation implements IndicatorCalculateCarrier<LocalDateTime>
 
 	/** 布林线指标 */
 	private BOLL boll;
-
-	/** 布林线400指标 */
-	private BOLL boll400;
 
 	/** 动向指标 */
 	private DMI dmi;

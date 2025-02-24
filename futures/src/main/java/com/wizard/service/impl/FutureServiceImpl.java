@@ -267,7 +267,9 @@ public class FutureServiceImpl implements FutureService {
 		String resultUrl = targetUrl+params;
 		log.info("开始请求,目标地址:{}",resultUrl);
 
-		String result = HttpRequest.get(resultUrl).execute().body();
+		String result = HttpRequest.get(resultUrl)
+				.setHttpProxy("127.0.0.1",7897)
+				.execute().body();
 		//log.info("原始结果:{}",result);
 		List<MarketQuotation> marketQuotationList = DataTransformationUtil.transform(symbolLineDTO.getSymbol(), result);
 		// 数据按照收盘时间排序
@@ -404,12 +406,12 @@ public class FutureServiceImpl implements FutureService {
 	public void indicatorSignal(Long logId) {
 		// 获取所有的交易对
 		List<String> symbolList = globalListComponent.getGlobalList();
-
-		List<SymbolBollVO> symbolBollVOList = new ArrayList<>();
+		symbolList.add("BTCUSDT");
+		List<MarketQuotation> symbolBollVOList = new ArrayList<>();
 		int count = 0;
 		for (String symbol:symbolList) {
 			try {
-				List<SymbolBollVO> tempSymbolBollVOList = monitorBollIndicator(logId,symbol);
+				List<MarketQuotation> tempSymbolBollVOList = monitorBollIndicator(logId,symbol);
 				symbolBollVOList.addAll(tempSymbolBollVOList);
 			} catch (Exception e){
 				log.error("日志ID:{},标的:{},查询报错",logId,symbol);
@@ -417,61 +419,15 @@ public class FutureServiceImpl implements FutureService {
 			count++;
 			log.info("日志ID:{},剩余数量:{}",logId,symbolList.size()-count);
 		}
-		List<SymbolBollVO> strongList = symbolBollVOList.stream().filter(item -> item.getUFlag() && item.getMFlag()).collect(Collectors.toList());
-		List<SymbolBollVO> weakList = symbolBollVOList.stream().filter(item -> !item.getMFlag()).collect(Collectors.toList());
 
+		List<MarketQuotation> fifteenMinuteList = symbolBollVOList.stream().filter(item -> item.getIntervalEnum().equals(IntervalEnum.FIFTEEN_MINUTE)).collect(Collectors.toList());
+		List<MarketQuotation> oneHourList = symbolBollVOList.stream().filter(item -> item.getIntervalEnum().equals(IntervalEnum.ONE_HOUR)).collect(Collectors.toList());
+		List<MarketQuotation> fourHourList = symbolBollVOList.stream().filter(item -> item.getIntervalEnum().equals(IntervalEnum.FOUR_HOUR)).collect(Collectors.toList());
+		List<MarketQuotation> oneDayList = symbolBollVOList.stream().filter(item -> item.getIntervalEnum().equals(IntervalEnum.ONE_DAY)).collect(Collectors.toList());
 
-		// 分别取值
-		List<SymbolBollVO> oneHourMoreThanM = symbolBollVOList.stream().filter(item -> item.getInterval().equals(IntervalEnum.ONE_HOUR.getName()) && item.getMFlag()).collect(Collectors.toList());
-		List<SymbolBollVO> oneHourLessThanM = symbolBollVOList.stream().filter(item -> item.getInterval().equals(IntervalEnum.ONE_HOUR.getName()) && !item.getMFlag()).collect(Collectors.toList());
+		List<MarketQuotation> tempFifteenMinuteList = fifteenMinuteList.stream().filter(item -> ObjectUtil.isNotNull(item.getSupertrend()) && item.getSupertrend().isUptrend()).collect(Collectors.toList());
 
-		List<SymbolBollVO> fourHourMoreThanM = symbolBollVOList.stream().filter(item -> item.getInterval().equals(IntervalEnum.FOUR_HOUR.getName()) && item.getMFlag()).collect(Collectors.toList());
-		List<SymbolBollVO> fourHourLessThanM = symbolBollVOList.stream().filter(item -> item.getInterval().equals(IntervalEnum.FOUR_HOUR.getName()) && !item.getMFlag()).collect(Collectors.toList());
-
-		List<SymbolBollVO> dayHourMoreThanM = symbolBollVOList.stream().filter(item -> item.getInterval().equals(IntervalEnum.ONE_DAY.getName()) && item.getMFlag()).collect(Collectors.toList());
-		List<SymbolBollVO> dayHourLessThanM = symbolBollVOList.stream().filter(item -> item.getInterval().equals(IntervalEnum.ONE_DAY.getName()) && !item.getMFlag()).collect(Collectors.toList());
-
-		List<SymbolBollVO> hourThanM = symbolBollVOList.stream().filter(item -> item.getInterval().equals(IntervalEnum.FOUR_HOUR.getName()) && item.getMFlag()).collect(Collectors.toList());
-		List<SymbolBollVO> dayLessM = symbolBollVOList.stream().filter(item -> item.getInterval().equals(IntervalEnum.ONE_DAY.getName()) && !item.getMFlag()).collect(Collectors.toList());
-
-
-
-		//SymbolLineDTO symbolLineDTO = SymbolLineDTO.builder()
-		//		.symbol("BTCUSDT")
-		//		.contractType(ContractTypeEnum.PERPETUAL.getCode())
-		//		.interval(IntervalEnum.ONE_HOUR.getCode())
-		//		.limit(1000).build();
-		//List<MarketQuotation> marketQuotationList = getContinuousKLines(symbolLineDTO);
-		//// 行情数据根据收盘时间降序排序
-		//marketQuotationList.sort(Comparator.comparing(MarketQuotation::getCloseTime).reversed());
-		//
-		//// 获取前4K数据
-		//List<MarketQuotation> lastList = marketQuotationList.subList(0,4);
-		//
-		//// 筛选TD指标
-		//List<MarketQuotation> tdList = lastList.stream().filter(item -> item.getTd() != null && (item.getTd() < -8 || item.getTd() > 8) && DateUtil.between(DateUtil.date(item.getCloseTime().toLocalDate()), new Date(),DateUnit.HOUR) < 24).collect(Collectors.toList());
-		//// 存在TD信号
-		//if(CollUtil.isNotEmpty(tdList)){
-		//	tdList.stream().forEach(item ->{
-		//		log.info("日志ID:{},开盘时间:{},收盘时间:{},TD数据:{}",logId,item.getTimestamp(),item.getCloseTime(),item.getTd());
-		//	});
-		//}
-		//// 计算是否触及MA120
-		//lastList.stream().forEach(item ->{
-		//	log.info("日志ID:{},开盘时间:{},收盘时间:{},当前价格:{},MA120数据:{},收盘价距离MA幅度:{}%",logId,item.getTimestamp(),item.getCloseTime(),item.getClose(),item.getMa120(),getRate(item.getClose(),item.getMa120()));
-		//	BigDecimal result = getRate(item.getClose(),item.getMa120());
-		//	if(result.compareTo(new BigDecimal("1")) < 0){
-		//		log.info("日志ID:{},开盘时间:{},收盘时间:{},当前价格:{},MA120数据:{},幅度不及1%",logId,item.getTimestamp(),item.getCloseTime(),item.getClose(),item.getMa120());
-		//	}
-		//});
-		//
-		//// 筛选CCI指标
-		//List<MarketQuotation> cciList = lastList.stream().filter(item -> item.getCci14() != null && (item.getCci14().getValue() < -140 || item.getCci14().getValue() > 140)).collect(Collectors.toList());
-		//if(CollUtil.isNotEmpty(cciList)){
-		//	cciList.stream().forEach(item ->{
-		//		log.info("日志ID:{},开盘时间:{},收盘时间:{},当前价格:{},CCI数据:{}",logId,item.getTimestamp(),item.getCloseTime(),item.getClose(),item.getCci14());
-		//	});
-		//}
+		log.info("{}",JSONObject.toJSONString(tempFifteenMinuteList));
 	}
 
 	/**
@@ -480,11 +436,11 @@ public class FutureServiceImpl implements FutureService {
 	 * @param symbol		标的
 	 * @return 				布林指标结果
 	 */
-	public List<SymbolBollVO> monitorBollIndicator(Long logId, String symbol) {
+	public List<MarketQuotation> monitorBollIndicator(Long logId, String symbol) {
 		log.info("日志ID:{},执行布林带监控逻辑,标的:{}",logId,symbol);
-		List<SymbolBollVO> symbolBollVOList = new ArrayList<>();
+		List<MarketQuotation> marketQuotationAllList = new ArrayList<>();
 		// 设置时间级别 1小时 4小时、1天
-		List<IntervalEnum> intervalList = Arrays.asList(IntervalEnum.ONE_HOUR,IntervalEnum.FOUR_HOUR,IntervalEnum.ONE_DAY);
+		List<IntervalEnum> intervalList = Arrays.asList(IntervalEnum.FIFTEEN_MINUTE,IntervalEnum.ONE_HOUR,IntervalEnum.FOUR_HOUR,IntervalEnum.ONE_DAY);
 		for (IntervalEnum intervalEnum:intervalList) {
 			SymbolLineDTO symbolLineDTO = SymbolLineDTO.builder()
 					.symbol(symbol)
@@ -492,41 +448,15 @@ public class FutureServiceImpl implements FutureService {
 					.interval(intervalEnum.getCode())
 					.limit(1000).build();
 			List<MarketQuotation> marketQuotationList = getContinuousKLines(symbolLineDTO);
+			marketQuotationList.stream().forEach(quotation -> {quotation.setIntervalEnum(intervalEnum);});
 			// 行情数据根据收盘时间降序排序
 			marketQuotationList.sort(Comparator.comparing(MarketQuotation::getCloseTime).reversed());
 
-			if(CollUtil.isNotEmpty(marketQuotationList)){
-				// 获取前4K数据
-				List<MarketQuotation> lastList = marketQuotationList.subList(0,1);
-				// 获取符合条件的布林带数据
-				List<MarketQuotation> bollList = lastList.stream().filter(item -> item.getBoll() != null).collect(Collectors.toList());
-				if(CollUtil.isNotEmpty(bollList)){
-					bollList.stream().forEach(item ->{
-						BOLL boll = item.getBoll();
-						//log.info("日志ID:{},布林带监控逻辑,标的:{},时间周期:{},开盘时间:{},收盘时间:{},当前价格:{},BOLL数据:{}",logId,symbol,intervalEnum.getName(),item.getTimestamp(),item.getCloseTime(),item.getClose(),item.getBoll());
-						// 判断当前价格距离中轨的幅度
-						BigDecimal result = getRate(item.getClose(),boll.getM());
-						Boolean amplitude = Boolean.FALSE;
-						if(result.compareTo(new BigDecimal("3")) < 0){
-							//log.info("日志ID:{},布林带监控逻辑,标的:{},时间周期:{},开盘时间:{},收盘时间:{},当前价格:{},布林中轨价格:{},幅度不及1%",logId,symbol,intervalEnum.getName(),item.getTimestamp(),item.getCloseTime(),item.getClose(),item.getMa120());
-							amplitude = Boolean.TRUE;
-						}
-						SymbolBollVO buildSymbolBollVO = SymbolBollVO.builder().symbol(symbol).interval(intervalEnum.getName())
-								.closeTime(item.getCloseTime()).close(item.getClose())
-								.u(boll.getU()).m(boll.getM()).d(boll.getD())
-								.uFlag(item.getClose() >= boll.getU() ? Boolean.TRUE : Boolean.FALSE)
-								.mFlag(item.getClose() >= boll.getM() ? Boolean.TRUE : Boolean.FALSE)
-								.dFlag(item.getClose() < boll.getD() ? Boolean.TRUE : Boolean.FALSE)
-								.mAmplitude(amplitude)
-								.build();
-						symbolBollVOList.add(buildSymbolBollVO);
-					});
-				}
-			}
+			marketQuotationAllList.addAll(marketQuotationList);
+			ThreadUtil.sleep(10,TimeUnit.MILLISECONDS);
 
-			ThreadUtil.sleep(100,TimeUnit.MILLISECONDS);
 		}
-		return symbolBollVOList;
+		return marketQuotationAllList;
 
 	}
 

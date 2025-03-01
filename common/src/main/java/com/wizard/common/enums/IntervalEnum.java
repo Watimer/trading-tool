@@ -1,5 +1,6 @@
 package com.wizard.common.enums;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 

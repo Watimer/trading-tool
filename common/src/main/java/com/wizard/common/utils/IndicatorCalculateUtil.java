@@ -134,9 +134,6 @@ public class IndicatorCalculateUtil {
 			calculateManager.accept(marketQuotation);
 			marketQuotation.setSupertrend(supertrendList.get(i));
 		}
-		//for (MarketQuotation mq : marketQuotationList) {
-		//	calculateManager.accept(mq);
-		//}
 	}
 
 	/**
@@ -192,7 +189,7 @@ public class IndicatorCalculateUtil {
 		indicatorCalculatorList.add(WR.buildCalculator(14,MarketQuotation::setWr14));
 		indicatorCalculatorList.add(WR.buildCalculator(20,MarketQuotation::setWr20));
 
-		indicatorCalculatorList.add(ATR.buildCalculator(13,14,indicatorSetScale,MarketQuotation::setAtr,MarketQuotation::getAtr));
+		indicatorCalculatorList.add(ATR.buildCalculator(14,13,indicatorSetScale,MarketQuotation::setAtr,MarketQuotation::getAtr));
 
 		return indicatorCalculatorList;
 	}

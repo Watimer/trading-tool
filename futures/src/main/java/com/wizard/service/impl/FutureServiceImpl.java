@@ -271,7 +271,7 @@ public class FutureServiceImpl implements FutureService {
 		//log.info("原始结果:{}",result);
 		List<MarketQuotation> marketQuotationList = DataTransformationUtil.transform(symbolLineDTO.getSymbol(), result);
 		// 数据按照收盘时间排序
-		marketQuotationList = marketQuotationList.stream().sorted(Comparator.comparing(MarketQuotation::getCloseTime)).collect(Collectors.toList());
+		//marketQuotationList = marketQuotationList.stream().sorted(Comparator.comparing(MarketQuotation::getCloseTime)).collect(Collectors.toList());
 		log.info("计算全部指标，开始");
 		// 计算指标
 		IndicatorCalculateUtil.multipleIndicatorCalculate(marketQuotationList,2);
@@ -404,6 +404,7 @@ public class FutureServiceImpl implements FutureService {
 	public void indicatorSignal(Long logId) {
 		// 获取所有的交易对
 		List<String> symbolList = globalListComponent.getGlobalList();
+		symbolList.add("SOLUSDT");
 
 		List<SymbolBollVO> symbolBollVOList = new ArrayList<>();
 		int count = 0;
@@ -484,13 +485,13 @@ public class FutureServiceImpl implements FutureService {
 		log.info("日志ID:{},执行布林带监控逻辑,标的:{}",logId,symbol);
 		List<SymbolBollVO> symbolBollVOList = new ArrayList<>();
 		// 设置时间级别 1小时 4小时、1天
-		List<IntervalEnum> intervalList = Arrays.asList(IntervalEnum.ONE_HOUR,IntervalEnum.FOUR_HOUR,IntervalEnum.ONE_DAY);
+		List<IntervalEnum> intervalList = Arrays.asList(IntervalEnum.FOUR_HOUR);
 		for (IntervalEnum intervalEnum:intervalList) {
 			SymbolLineDTO symbolLineDTO = SymbolLineDTO.builder()
 					.symbol(symbol)
 					.contractType(ContractTypeEnum.PERPETUAL.getCode())
 					.interval(intervalEnum.getCode())
-					.limit(1000).build();
+					.limit(200).build();
 			List<MarketQuotation> marketQuotationList = getContinuousKLines(symbolLineDTO);
 			// 行情数据根据收盘时间降序排序
 			marketQuotationList.sort(Comparator.comparing(MarketQuotation::getCloseTime).reversed());
@@ -568,7 +569,7 @@ public class FutureServiceImpl implements FutureService {
 		List<Double> highs = marketQuotationList.stream().map(MarketQuotation::getHigh).collect(Collectors.toList());
 		List<Double> lows = marketQuotationList.stream().map(MarketQuotation::getLow).collect(Collectors.toList());
 		List<Double> closes = marketQuotationList.stream().map(MarketQuotation::getClose).collect(Collectors.toList());
-		List<Supertrend> supertrendList = SupertrendUtil.calculateSupertrend(highs, lows, closes, 13, 3);
+		List<Supertrend> supertrendList = SupertrendUtil.calculateSuperTrend(highs, lows, closes, 13, 3);
 
 		log.info("{}", JSONObject.toJSONString(supertrendList));
 	}

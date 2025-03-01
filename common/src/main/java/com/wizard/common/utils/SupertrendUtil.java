@@ -23,11 +23,11 @@ public class SupertrendUtil {
 			lows.add(marketQuotation.getLow());
 			closes.add(marketQuotation.getClose());
 		});
-		return calculateSupertrend(highs, lows, closes, period, multiplier);
+		return calculateSuperTrend(highs, lows, closes, period, multiplier);
 	}
 
 	// 计算超级趋势
-	public static List<Supertrend> calculateSupertrend(List<Double> highs, List<Double> lows, List<Double> closes, int period, double multiplier) {
+	public static List<Supertrend> calculateSuperTrend(List<Double> highs, List<Double> lows, List<Double> closes, int period, double multiplier) {
 		List<Double> atr = CalculateATR.calculateATR(highs, lows, closes, period);
 		List<Supertrend> supertrend = new ArrayList<>();
 
@@ -78,7 +78,7 @@ public class SupertrendUtil {
 		double multiplier = 13; // 超级趋势系数
 
 		// 计算超级趋势
-		List<Supertrend> supertrend = calculateSupertrend(highs, lows, closes, period, multiplier);
+		List<Supertrend> supertrend = calculateSuperTrend(highs, lows, closes, period, multiplier);
 
 		// 打印结果
 		for (int i = 0; i < supertrend.size(); i++) {

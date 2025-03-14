@@ -12,6 +12,7 @@
         <module>futures</module>
         <module>push-system</module>
         <module>common</module>
+        <module>ads-demo</module>
     </modules>
 
     <parent>

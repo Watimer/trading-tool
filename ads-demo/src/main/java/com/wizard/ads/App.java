@@ -14,6 +14,7 @@ public class App
 {
     public static void main( String[] args ){
         SpringApplication.run(App.class, args);
+        System.setProperty("java.awt.headless", "false");
         log.info("服务启动");
     }
 }

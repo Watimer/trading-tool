@@ -1,6 +1,8 @@
 package com.wizard.ads.service;
 
 import com.wizard.ads.model.Fingerprint;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Proxy;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -49,7 +51,22 @@ public class FingerprintService {
 		options.setExperimentalOption("excludeSwitches", Collections.singletonList("enable-automation")); // 禁用自动化控制信息
 		//options.addArguments("--disable-infobars");
 		//options.addExtensions(new File("/Users/yueyaoli/Library/Application Support/Google/Chrome/Default/Extensions/bkhaagjahfmjljalopjnoealnfndnagc/8.0.1_0.crx"));
+		//Proxy proxy = new Proxy();
+		//proxy.setHost("171.236.171.211");
+		//proxy.setPort(47927);
+		//proxy.setUsername("hADVLI");
+		//proxy.setPassword("RIybIj");
+		//String socks5Proxy ="socks5://hADVLI:RIybIj@171.236.171.211:47927";
+		//Proxy proxy = new Proxy();
+		//proxy.setSocksProxy(socks5Proxy);
+		//options.setProxy(proxy);
+		//options.addArguments("--proxy-server=https://171.236.171.211:47927");
+		//options.addArguments("--load-extension=/Users/yueyaoli/wizard/chajian");
+		//options.addArguments("--disable-extensions-file-verification");
 
+		options.addArguments("--no-sandbox", "--disable-dev-shm-usage");
+		options.setExperimentalOption("excludeSwitches", new String[]{"enable-automation"});
+		options.setExperimentalOption("useAutomationExtension", false);
 
 		// 加载并授权 Chrome 插件
 		try {
@@ -61,6 +78,19 @@ public class FingerprintService {
 
 		// 创建并返回ChromeDriver实例
 		WebDriver driver = new ChromeDriver(options);
+		JavascriptExecutor js = (JavascriptExecutor) driver;
+		// 伪装 navigator.webdriver
+		js.executeScript("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})");
+
+		// 伪装 navigator.plugins 和 mimeTypes
+		js.executeScript("Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3]})");
+		js.executeScript("Object.defineProperty(navigator, 'mimeTypes', {get: () => [1, 2, 3]})");
+
+		// 伪装 Chrome 环境
+		js.executeScript("window.chrome = {runtime: {}}");
+
+		// 伪装 WebGL 指纹
+		js.executeScript("WebGLRenderingContext.prototype.getParameter = (param) => param === 37445 ? 'NVIDIA GeForce RTX 3080' : 'Intel HD Graphics';");
 		return driver;
 	}
 

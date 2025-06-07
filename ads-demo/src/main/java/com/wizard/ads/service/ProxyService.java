@@ -17,15 +17,15 @@ public class ProxyService {
 	 * @param proxy 包含代理主机和端口的代理信息
 	 * @return ChromeOptions 对象，包含代理设置
 	 */
-	public ChromeOptions configureProxy(Proxy proxy) {
-		// 创建SeleniumProxy对象以设置代理
-		org.openqa.selenium.Proxy seleniumProxy = new org.openqa.selenium.Proxy();
-		seleniumProxy.setHttpProxy(proxy.getHost() + ":" + proxy.getPort()); // 设置HTTP代理
-		seleniumProxy.setSslProxy(proxy.getHost() + ":" + proxy.getPort());  // 设置SSL代理
-
-		// 创建ChromeOptions对象并设置代理
-		ChromeOptions options = new ChromeOptions();
-		options.setProxy(seleniumProxy);
-		return options;
-	}
+	//public ChromeOptions configureProxy(Proxy proxy) {
+	//	// 创建SeleniumProxy对象以设置代理
+	//	org.openqa.selenium.Proxy seleniumProxy = new org.openqa.selenium.Proxy();
+	//	seleniumProxy.setHttpProxy(proxy.getHost() + ":" + proxy.getPort()); // 设置HTTP代理
+	//	seleniumProxy.setSslProxy(proxy.getHost() + ":" + proxy.getPort());  // 设置SSL代理
+	//
+	//	// 创建ChromeOptions对象并设置代理
+	//	ChromeOptions options = new ChromeOptions();
+	//	options.setProxy(seleniumProxy);
+	//	return options;
+	//}
 }

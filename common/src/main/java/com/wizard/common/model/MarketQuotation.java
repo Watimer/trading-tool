@@ -164,6 +164,9 @@ public class MarketQuotation implements IndicatorCalculateCarrier<LocalDateTime>
 
 	private Supertrend supertrend;
 
+	/** 新的SuperTrend指标（包含完整信息） */
+	private com.wizard.common.utils.SuperTrend supertrendIndicator;
+
 	private ATR atr;
 
 }

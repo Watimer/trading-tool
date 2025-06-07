@@ -189,7 +189,19 @@ public class IndicatorCalculateUtil {
 		indicatorCalculatorList.add(WR.buildCalculator(14,MarketQuotation::setWr14));
 		indicatorCalculatorList.add(WR.buildCalculator(20,MarketQuotation::setWr20));
 
+		//ATR-计算器: 平均真实波动范围
 		indicatorCalculatorList.add(ATR.buildCalculator(14,13,indicatorSetScale,MarketQuotation::setAtr,MarketQuotation::getAtr));
+
+		//SuperTrend-计算器: 超级趋势指标
+		indicatorCalculatorList.add(com.wizard.common.utils.SuperTrend.buildCalculator( 13, 3.0, true, indicatorSetScale,
+			(marketQuotation, superTrend) -> {
+				marketQuotation.setSupertrendIndicator(superTrend);
+				// 同时设置兼容的supertrend字段
+				if (superTrend != null) {
+					marketQuotation.setSupertrend(superTrend.toSupertrendModel());
+				}
+			},
+			MarketQuotation::getSupertrendIndicator));
 
 		return indicatorCalculatorList;
 	}

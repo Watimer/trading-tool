@@ -21,6 +21,7 @@ import com.wizard.common.model.Supertrend;
 import com.wizard.common.utils.DataTransformationUtil;
 import com.wizard.common.utils.IndicatorCalculateUtil;
 import com.wizard.common.utils.SupertrendUtil;
+//import com.wizard.common.utils.TradingViewSuperTrendUtil;
 import com.wizard.component.CheckComponent;
 import com.wizard.component.GlobalListComponent;
 import com.wizard.config.PrivateConfig;
@@ -562,7 +563,7 @@ public class FutureServiceImpl implements FutureService {
 				.symbol("BTCUSDT")
 				.contractType(ContractTypeEnum.PERPETUAL.getCode())
 				.interval(IntervalEnum.ONE_HOUR.getCode())
-				.limit(500).build();
+				.limit(50).build();
 		List<MarketQuotation> marketQuotationList = getContinuousKLines(symbolLineDTO);
 		// 根据 age 字段逆序排序
 		//marketQuotationList.sort(Comparator.comparing(MarketQuotation::getTimestamp).reversed());
@@ -572,5 +573,8 @@ public class FutureServiceImpl implements FutureService {
 		List<Supertrend> supertrendList = SupertrendUtil.calculateSuperTrend(highs, lows, closes, 13, 3);
 
 		log.info("{}", JSONObject.toJSONString(supertrendList));
+
+		//List<TradingViewSuperTrendUtil.SuperTrendResult> superTrendResults = TradingViewSuperTrendUtil.calculateSuperTrend(marketQuotationList);
+		//log.info("{}", JSONObject.toJSONString(superTrendResults));
 	}
 }

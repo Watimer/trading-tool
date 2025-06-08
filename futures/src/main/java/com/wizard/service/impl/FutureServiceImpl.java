@@ -563,18 +563,8 @@ public class FutureServiceImpl implements FutureService {
 				.symbol("BTCUSDT")
 				.contractType(ContractTypeEnum.PERPETUAL.getCode())
 				.interval(IntervalEnum.ONE_HOUR.getCode())
-				.limit(50).build();
+				.limit(500).build();
 		List<MarketQuotation> marketQuotationList = getContinuousKLines(symbolLineDTO);
-		// 根据 age 字段逆序排序
-		//marketQuotationList.sort(Comparator.comparing(MarketQuotation::getTimestamp).reversed());
-		List<Double> highs = marketQuotationList.stream().map(MarketQuotation::getHigh).collect(Collectors.toList());
-		List<Double> lows = marketQuotationList.stream().map(MarketQuotation::getLow).collect(Collectors.toList());
-		List<Double> closes = marketQuotationList.stream().map(MarketQuotation::getClose).collect(Collectors.toList());
-		List<Supertrend> supertrendList = SupertrendUtil.calculateSuperTrend(highs, lows, closes, 13, 3);
-
-		log.info("{}", JSONObject.toJSONString(supertrendList));
-
-		//List<TradingViewSuperTrendUtil.SuperTrendResult> superTrendResults = TradingViewSuperTrendUtil.calculateSuperTrend(marketQuotationList);
-		//log.info("{}", JSONObject.toJSONString(superTrendResults));
+		log.info("{}", JSONObject.toJSONString(marketQuotationList));
 	}
 }

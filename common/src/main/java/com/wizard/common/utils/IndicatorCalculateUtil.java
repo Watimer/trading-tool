@@ -124,15 +124,10 @@ public class IndicatorCalculateUtil {
 		List<IndicatorCalculator<MarketQuotation, ?>> calculatorConfig = buildIndicatorCalculatorList(indicatorSetScale);
 		int maximum =400;//管理指标载体的最大数量
 		IndicatorWarehouseManager<LocalDateTime,MarketQuotation> calculateManager = new IndicatorWarehouseManager<>(maximum, calculatorConfig);
-
-		// 计算超级趋势
-	    List<Supertrend> supertrendList = SupertrendUtil.calculateSuperTrend(marketQuotationList,13,3);
-
 		//循环-管理员接收 新行情数据-进行批量计算所有指标
 		for (int i = 0; i < marketQuotationList.size(); i++) {
 			MarketQuotation marketQuotation = marketQuotationList.get(i);
 			calculateManager.accept(marketQuotation);
-			marketQuotation.setSupertrend(supertrendList.get(i));
 		}
 	}
 
@@ -193,7 +188,7 @@ public class IndicatorCalculateUtil {
 		indicatorCalculatorList.add(ATR.buildCalculator(14,13,indicatorSetScale,MarketQuotation::setAtr,MarketQuotation::getAtr));
 
 		//SuperTrend-计算器: 超级趋势指标
-		indicatorCalculatorList.add(com.wizard.common.utils.SuperTrend.buildCalculator( 13, 3.0, true, indicatorSetScale,
+		indicatorCalculatorList.add(com.wizard.common.utils.SuperTrend.buildCalculator( 13, 3.0, SuperTrend.PriceSource.HL2,true, indicatorSetScale,
 			(marketQuotation, superTrend) -> {
 				marketQuotation.setSupertrendIndicator(superTrend);
 				// 同时设置兼容的supertrend字段
